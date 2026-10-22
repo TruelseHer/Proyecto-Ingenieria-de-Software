@@ -52,3 +52,13 @@
 *   **Entorno:** Operación normal.
 *   **Respuesta:** El sistema se autentica con el proveedor de correo, escanea el mensaje utilizando las APIs estándar, extrae los datos relevantes, cruza la información con los sistemas de aerolíneas/hoteles y actualiza el itinerario del usuario.
 *   **Medida de respuesta:** El itinerario se actualiza y sincroniza en el sistema del usuario con un 100% de precisión en el mapeo de datos, intercambiando la información en un formato estándar (ej. JSON/REST) sin requerir intervención manual.
+
+## 5. Seguridad y Privacidad (Security)
+*El sistema procesa información personal. Debe garantizarse el acceso seguro y autorizado a los correos, y permitir el uso compartido de itinerarios asegurando que solo personas específicas designadas puedan visualizarlos.*
+
+*   **Fuente del estímulo:** Usuario malintencionado / Atacante externo.
+*   **Estímulo:** Intento de acceso a un itinerario compartido utilizando un enlace modificado o intento de lectura de correos sin tener los privilegios adecuados.
+*   **Artefacto:** Componente de Autenticación y Control de Acceso (Autorización).
+*   **Entorno:** Sistema operando de forma normal en la nube pública.
+*   **Respuesta:** El sistema verifica las credenciales y la lista de control de acceso (ACL). Al detectar que no hay autorización, deniega el acceso, enmascara los datos sensibles, bloquea la acción y registra el intento fallido en los logs de auditoría.
+*   **Medida de respuesta:** El 100% de los intentos de acceso no autorizados son denegados, garantizando que **solo** las personas específicamente designadas puedan visualizar los itinerarios y correos.
