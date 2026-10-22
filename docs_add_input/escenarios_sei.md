@@ -1,5 +1,5 @@
-
-### **Rendimiento (Performance)**
+# Escenarios de atributos de calidad con la plantilla SEI
+## 1. **Rendimiento (Performance)**
 
 * **Escenario 1: Notificación de Alojamiento Disponible (Integración Externa)**
   * **Fuente del estímulo:** Servicio externo de reserva (ej. Booking).
@@ -23,7 +23,7 @@
   * **Respuesta:** El cliente móvil procesa el renderizado crítico, aplicando tácticas de optimización de recursos (minimización de *assets*, carga asíncrona y procesamiento progresivo del DOM) para desplegar los primeros elementos visuales en pantalla.
   * **Medida de la respuesta:** El primer despliegue de contenido (*First Contentful Paint* / FCP) se completa en un tiempo menor a **1.4 segundos**.
 
-### **Disponibilidad (Availability)**
+## 2. **Disponibilidad (Availability)**
 
 * **Escenario 1: Tolerancia a Fallas en Infraestructura Crítica**
   * **Fuente del estímulo:** Falla interna del sistema o caída de la infraestructura (ej. nodo de servidor o base de datos).
@@ -33,7 +33,7 @@
   * **Respuesta:** El sistema detecta la caída, enruta automáticamente el tráfico hacia un servidor de respaldo (*failover*) y notifica al equipo de operaciones (DevOps), manteniendo la sesión de los usuarios activa.
   * **Medida de la respuesta:** El servicio se restablece completamente asegurando que el tiempo total de inactividad no planificada **no supere los 5 minutos acumulados por mes**.
 
-## 2. Escalabilidad (Scalability)
+## 3. Escalabilidad (Scalability)
 *La plataforma debe dimensionarse para soportar una base de 15 millones de cuentas, operando con 2 millones de usuarios activos semanales y soportando dramáticos picos de tráfico ante eventos disruptivos masivos.*
 
 *   **Fuente del estímulo:** Usuarios del sistema (viajeros).
@@ -43,7 +43,7 @@
 *   **Respuesta:** La plataforma escala horizontalmente aprovisionando de manera automática nuevas instancias de servidores y equilibrando la carga para procesar las peticiones simultáneas sin degradar el servicio.
 *   **Medida de respuesta:** El sistema maneja el pico de tráfico exitosamente, manteniendo el tiempo de carga de las páginas por debajo de 3 segundos y sin rechazar conexiones válidas ni perder datos.
 
-## 3. Interoperabilidad (Interoperability)
+## 4. Interoperabilidad (Interoperability)
 *Integración fluida con intercambios de aerolíneas, hoteles y arrendadoras a través de APIs estándar, además de interoperar con proveedores de correo y redes sociales.*
 
 *   **Fuente del estímulo:** Sistemas externos (APIs de Aerolíneas/Hoteles, Proveedores de Correo Electrónico).
