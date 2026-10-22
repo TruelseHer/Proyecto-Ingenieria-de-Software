@@ -32,14 +32,3 @@
   * **Artefacto:** Infraestructura de servidores y bases de datos del sistema.
   * **Respuesta:** El sistema detecta la caída, enruta automáticamente el tráfico hacia un servidor de respaldo (*failover*) y notifica al equipo de operaciones (DevOps), manteniendo la sesión de los usuarios activa.
   * **Medida de la respuesta:** El servicio se restablece completamente asegurando que el tiempo total de inactividad no planificada **no supere los 5 minutos acumulados por mes**.
-
-## Disponibilidad (Availability)
-*El sistema es de uso global y debe ser accesible en todo momento, tolerando un máximo de 5 minutos por mes de tiempo de inactividad no planificado.*
-
-*   **Fuente del estímulo:** Falla interna del sistema o caída de la infraestructura (ej. nodo de servidor o base de datos).
-*   **Estímulo:** Un componente crítico del sistema se cae inesperadamente, interrumpiendo el servicio normal.
-*   **Artefacto:** Infraestructura de servidores y bases de datos del sistema.
-*   **Entorno:** Operación normal con carga global de usuarios concurrentes.
-*   **Respuesta:** El sistema detecta la caída, enruta automáticamente el tráfico hacia un servidor de respaldo (failover) y notifica al equipo de operaciones (DevOps), manteniendo la sesión de los usuarios activa.
-*   **Medida de respuesta:** El servicio se restablece completamente asegurando que el tiempo total de inactividad no planificada **no supere los 5 minutos acumulados por mes**.
-
