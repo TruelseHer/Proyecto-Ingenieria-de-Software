@@ -72,3 +72,13 @@
 *   **Entorno:** Tiempo de diseño y desarrollo (Design-time).
 *   **Respuesta:** Los desarrolladores utilizan los ADRs y el diseño basado en contratos (Spec-driven) para crear nuevos microservicios/módulos para trenes y autobuses de manera aislada, sin modificar el código core de los módulos existentes (vuelos y hoteles).
 *   **Medida de respuesta:** La nueva integración de medios de transporte se desarrolla y despliega en menos de 2 sprints (o en un tiempo predeterminado), pasando el 100% de las pruebas automatizadas de regresión y garantizando trazabilidad completa desde el requerimiento hasta el código.
+
+## 6. Usabilidad (Usability) e Internacionalización
+*Se requiere una interfaz rica (aprovechando capacidades nativas como GPS en móviles) y el sistema debe estar preparado arquitectónicamente para operar en el mercado internacional (multiregión).*
+
+*   **Fuente del estímulo:** Usuario internacional utilizando la aplicación móvil.
+*   **Estímulo:** Un usuario viaja desde EE. UU. a Japón y abre la aplicación para buscar cómo llegar a su hotel desde su ubicación actual.
+*   **Artefacto:** Interfaz de usuario de la aplicación móvil (UI/UX) y motor de internacionalización (i18n).
+*   **Entorno:** Tiempo de ejecución, dispositivo móvil con conectividad a red extranjera y GPS activo.
+*   **Respuesta:** La aplicación lee la ubicación nativa del GPS, solicita permiso de localización, y adapta la interfaz para mostrar mapas locales, calculando la ruta al hotel. Además, procesa monedas y zonas horarias basándose en la configuración multiregión.
+*   **Medida de respuesta:** La interfaz proporciona indicaciones basadas en la ubicación en menos de 2 segundos de haber abierto el mapa, y la información (hora, moneda) se presenta correctamente localizada para el usuario, logrando que complete su objetivo con éxito en menos de 3 clics.
