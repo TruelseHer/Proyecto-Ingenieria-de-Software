@@ -63,7 +63,7 @@
 *   **Respuesta:** El sistema verifica las credenciales y la lista de control de acceso (ACL). Al detectar que no hay autorización, deniega el acceso, enmascara los datos sensibles, bloquea la acción y registra el intento fallido en los logs de auditoría.
 *   **Medida de respuesta:** El 100% de los intentos de acceso no autorizados son denegados, garantizando que **solo** las personas específicamente designadas puedan visualizar los itinerarios y correos.
 
-## 5. Evolucionabilidad y Mantenibilidad (Evolvability)
+## 6. Evolucionabilidad y Mantenibilidad (Evolvability)
 *La arquitectura debe prever la integración futura de otros medios de transporte (trenes, autobuses, etc.). Apoyándose en el uso de ADRs y contratos (Spec-driven), el diseño general y el prototipo final deben exhibir una alta trazabilidad.*
 
 *   **Fuente del estímulo:** Equipo de desarrollo / Arquitectura.
@@ -73,7 +73,7 @@
 *   **Respuesta:** Los desarrolladores utilizan los ADRs y el diseño basado en contratos (Spec-driven) para crear nuevos microservicios/módulos para trenes y autobuses de manera aislada, sin modificar el código core de los módulos existentes (vuelos y hoteles).
 *   **Medida de respuesta:** La nueva integración de medios de transporte se desarrolla y despliega en menos de 2 sprints (o en un tiempo predeterminado), pasando el 100% de las pruebas automatizadas de regresión y garantizando trazabilidad completa desde el requerimiento hasta el código.
 
-## 6. Usabilidad (Usability) e Internacionalización
+## 7. Usabilidad (Usability) e Internacionalización
 *Se requiere una interfaz rica (aprovechando capacidades nativas como GPS en móviles) y el sistema debe estar preparado arquitectónicamente para operar en el mercado internacional (multiregión).*
 
 *   **Fuente del estímulo:** Usuario internacional utilizando la aplicación móvil.
