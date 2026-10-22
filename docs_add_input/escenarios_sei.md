@@ -42,3 +42,13 @@
 *   **Entorno:** Operación bajo alta demanda, con 2 millones de usuarios activos semanales y un incremento súbito del 500% en el tráfico en pocos minutos.
 *   **Respuesta:** La plataforma escala horizontalmente aprovisionando de manera automática nuevas instancias de servidores y equilibrando la carga para procesar las peticiones simultáneas sin degradar el servicio.
 *   **Medida de respuesta:** El sistema maneja el pico de tráfico exitosamente, manteniendo el tiempo de carga de las páginas por debajo de 3 segundos y sin rechazar conexiones válidas ni perder datos.
+
+## 3. Interoperabilidad (Interoperability)
+*Integración fluida con intercambios de aerolíneas, hoteles y arrendadoras a través de APIs estándar, además de interoperar con proveedores de correo y redes sociales.*
+
+*   **Fuente del estímulo:** Sistemas externos (APIs de Aerolíneas/Hoteles, Proveedores de Correo Electrónico).
+*   **Estímulo:** El usuario recibe un correo electrónico con una confirmación de reserva que el sistema debe procesar.
+*   **Artefacto:** Módulo de integraciones, escaneo de correos y adaptadores de API.
+*   **Entorno:** Operación normal.
+*   **Respuesta:** El sistema se autentica con el proveedor de correo, escanea el mensaje utilizando las APIs estándar, extrae los datos relevantes, cruza la información con los sistemas de aerolíneas/hoteles y actualiza el itinerario del usuario.
+*   **Medida de respuesta:** El itinerario se actualiza y sincroniza en el sistema del usuario con un 100% de precisión en el mapeo de datos, intercambiando la información en un formato estándar (ej. JSON/REST) sin requerir intervención manual.
