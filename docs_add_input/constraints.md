@@ -1,4 +1,4 @@
-| ID | Restricción (*Constraint*) | Categoría | Justificación / Origen en el TPE | Impacto en las Decisiones de Diseño |
+| ID | Restricción (*Constraint*) | Categoría | Justificación | Impacto en las Decisiones de Diseño |
 | :--- | :--- | :--- | :--- | :--- |
 | **CON-1** | **Soporte de clientes Web y Móvil nativo** | Plataforma / Ejecución | Requerimiento de acceso vía navegadores modernos de escritorio y dispositivos móviles con capacidades de geolocalización (GPS). | La arquitectura debe proveer capas de interfaces/APIs que permitan servir ambos tipos de clientes sin duplicar la lógica de negocio. | 
 | **CON-2** | **Integración obligatoria con proveedores turísticos externos** | Interoperabilidad / Sistemas externos | Conexión con APIs de aerolíneas, cadenas hoteleras y empresas de alquiler de vehículos. | Obliga a incorporar capas de adaptación e interfaces normalizadas para interactuar con sistemas de terceros con protocolos heterogéneos y tiempos de respuesta variables. |
