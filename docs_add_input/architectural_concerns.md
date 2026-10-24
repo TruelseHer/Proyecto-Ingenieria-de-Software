@@ -6,13 +6,13 @@ Los **Architectural Concerns** representan inquietudes, necesidades técnicas, o
 
 ## Tabla Resumen de Drivers (Concerns)
 
-| ID | Concern (Inquietud Arquitectónica) | Justificación / Origen en el TPE |
+| ID | Concern (Inquietud Arquitectónica) | Justificación  |
 | :--- | :--- | :--- |
 | **CRN-1** | Establecer la estructura macro del sistema (*Greenfield*). | Inicio del diseño de la plataforma "Trotamundos" desde cero. |
 | **CRN-2** | Habilitar diseño por contratos (*Spec-driven development*). | Exigencia metodológica del TPE para trazabilidad y APIs. |
 | **CRN-3** | Separar las consultas pesadas de números/estadísticas del uso diario de la app. | Consultas pesadas de monetización sin degradar rendimiento. |
 | **CRN-4** | Modularizar para asignación de trabajo y documentación ADR. | Coordinación grupal y captura formal con MADR. |
-| **CRN-5** | Extensibilidad para módulos avanzados (Recomendación / Chatbot). | Alcance obligatorio de la segunda entrega del TPE. |
+| **CRN-5** | Extensibilidad para módulos avanzados (Recomendación / Chatbot). | Alcance obligatorio especificado en el enunciado del tpe. |
 
 ---
 
