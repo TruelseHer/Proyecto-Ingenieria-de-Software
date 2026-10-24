@@ -94,7 +94,7 @@
 #### Criterios de Aceptación
 
 -  La captura y envío de eventos analíticos se realiza de forma asíncrona para no penalizar la latencia operativa ni el rendimiento bajo picos de carga (2 millones de usuarios activos semanales).
--  Todos los datos recopilados se anonimizan, desasociando información personal identificable (PII) según los requisitos de seguridad y privacidad.
--  Las consultas complejas y pesadas se dirigen a un repositorio de datos analítico segregado (CQRS / Data Warehouse), preservando la disponibilidad del sistema transaccional.
+-  Todos los datos recopilados se anonimizan, desasociando información personal identificable según los requisitos de seguridad y privacidad.
+-  Las consultas complejas y pesadas se dirigen a un repositorio de datos analítico segregado, preservando la disponibilidad del sistema transaccional.
 -  Se habilitan vistas y reportes por rangos temporales, destinos con mayor demanda y tasas de contingencias por aerolínea/proveedor.
 
