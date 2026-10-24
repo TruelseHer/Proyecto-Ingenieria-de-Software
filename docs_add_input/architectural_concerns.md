@@ -1,58 +1,36 @@
-# Architectural Concerns (CRN) - Proyecto Trotamundos
+# ADD Input Drivers: Architectural Concerns (CRN)
 
-Los **Architectural Concerns** representan inquietudes, necesidades técnicas, organizacionales y de ingeniería que guían el diseño de la arquitectura desde el inicio del método ADD, sin provenir necesariamente de una función directa de usuario.
+- **Proyecto:** Trotamundos — Plataforma Integral de Gestión de Viajes
+- **Fase:** ADD 3.0 — Step 1: Review Inputs
+- **Contexto del Sistema:** Greenfield System (Diseño desde cero)
+- **Estado:** Baseline / En Backlog
 
 ---
 
-## Tabla Resumen de Drivers (Concerns)
+## 1. Definición del Propósito de Diseño (Design Purpose)
 
-| ID | Concern (Inquietud Arquitectónica) | Justificación  |
+Diseñar desde cero (*greenfield*) la arquitectura de software escalable y distribuida para la plataforma **Trotamundos**, capaz de soportar hasta 15 millones de usuarios con picos estacionales de demanda, garantizando interoperabilidad con proveedores turísticos externos, aislamiento de cargas analíticas y cumplimiento metodológico mediante *Spec-Driven Development* y registros de decisiones MADR.
+
+---
+
+## 2. Design Backlog: Architectural Concerns
+
+| ID | Architectural Concern | Descripción Técnica | Impacto Arquitectónico y Estrategia | Estado |
+| :--- | :--- | :--- | :--- | :--- |
+| **CRN-1** | Establecimiento de la estructura macro inicial (*Greenfield base*) | Definir la organización estructural global, particionamiento de responsabilidades y estilos base para un desarrollo que parte desde cero. | Selección inicial de arquitectura de referencia y estilo arquitectónico (ej. microservicios / servicios distribuidos desacoplados) en la Iteración 1 de ADD. | `Not Yet Addressed` |
+| **CRN-2** | Adopción de *Spec-Driven Development* y gobernanza de interfaces | Estandarización previa y estricta de contratos de interfaz (APIs) antes de iniciar la implementación y construcción de prototipos. | Establecimiento de especificaciones formales (OpenAPI / AsyncAPI), desacoplamiento entre frontend/backend mediante dobles de prueba (*mocks*) y verificación de cumplimiento de contratos con sistemas externos. | `Not Yet Addressed` |
+| **CRN-3** | Segregación de procesamiento analítico y transaccional | Desacoplamiento entre la persistencia operativa de reservas en tiempo real y la ejecución de consultas analíticas pesadas para monetización. | Adopción de patrones de segregación de responsabilidades de consulta y comando (ej. réplicas de solo lectura / CQRS / pipelines de streaming asincrónicos) para evitar degradación de latencia en la experiencia del usuario. | `Not Yet Addressed` |
+| **CRN-4** | Modularización para distribución de trabajo y gobernanza ADR | Organización de subsistemas y módulos alineados a la estructura del equipo, permitiendo desarrollo concurrente y trazabilidad formal de decisiones. | Definición de límites de módulos con dependencias explícitas (alineado a la Ley de Conway) y obligatoriedad de captura de decisiones mediante plantillas MADR (*Markdown Architectural Decision Records*). | `Not Yet Addressed` |
+| **CRN-5** | Extensibilidad para integración de módulos avanzados (Entrega 2) | Provisión de puntos de extensión desacoplados para incorporar capacidades avanzadas (Sistema de recomendación personalizada o Asistente virtual / Chatbot) sin refactorizaciones del núcleo transaccional. | Diseño de interfaces de extensión y comunicación orientada a eventos para permitir el *plugging* independiente de componentes inteligentes futuros. | `Not Yet Addressed` |
+
+---
+
+## 3. Mapeo a Iteraciones Iniciales de ADD
+
+| Driver ID | Iteración Prevista | Foco Principal de Decisión |
 | :--- | :--- | :--- |
-| **CRN-1** | Establecer la estructura macro del sistema (*Greenfield*). | Inicio del diseño de la plataforma "Trotamundos" desde cero. |
-| **CRN-2** | Habilitar diseño por contratos (*Spec-driven development*). | Exigencia metodológica del TPE para trazabilidad y APIs. |
-| **CRN-3** | Separar las consultas pesadas de números/estadísticas del uso diario de la app. | Consultas pesadas de monetización sin degradar rendimiento. |
-| **CRN-4** | Modularizar para asignación de trabajo y documentación ADR. | Coordinación grupal y captura formal con MADR. |
-| **CRN-5** | Extensibilidad para módulos avanzados (Recomendación / Chatbot). | Alcance obligatorio especificado en el enunciado del tpe. |
-
----
-
-## Descripción Detallada de cada Concern
-
-### CRN-1: Establecer la estructura macro del sistema (Greenfield)
-* **¿Qué es?**  
-  Como el proyecto arranca desde cero (*greenfield*), la primera preocupación técnica es definir el esqueleto general de la aplicación antes de programar nada.
-* **Impacto en el diseño:**  
-  Obliga a elegir en la primera iteración el estilo arquitectónico base (por ejemplo, microservicios frente a un monolito modular) para que el equipo sepa cómo se organizan los componentes, los servicios y la base de datos central.
-
----
-
-### CRN-2: Habilitar diseño por contratos (Spec-Driven Development)
-* **¿Qué es?**  
-  Consiste en escribir y dejar fijas las especificaciones de las APIs (por ejemplo con OpenAPI / Swagger) antes de tirar una sola línea de código real.
-* **Impacto en el diseño:**  
-  Permite que el equipo frontend pueda trabajar armando pantallas con datos simulados (*mocks*) mientras el equipo backend programa la lógica real sin trabarse. Además, asegura que cuando conectemos las APIs de aerolíneas y hoteles, todos hablen exactamente el mismo idioma y formato.
-
----
-
-### CRN-3: Separar las consultas pesadas de estadísticas del uso diario de la app
-* **Explicación simple:**  
-  Imaginate una caja de supermercado. Si una persona va a pagar un alfajor, tarda 5 segundos. Pero si atrás cae el dueño del súper a contar todas las ventas del mes en esa misma caja, la traba y nadie más puede pagar su alfajor.  
-  Acá pasa lo mismo: Trotamundos necesita sacar estadísticas gigantes para ganar plata con publicidad o datos (monetización). Esas cuentas tardan un montón y consumen muchísima máquina. Si hacemos esas cuentas pesadas en la misma base de datos donde la gente está buscando sus vuelos o viendo sus pasajes, la app se le va a congelar a todo el mundo.  
-* **Impacto en el diseño:**  
-  Creamos "dos caminos separados": por un lado viaja la gente normal reservando viajes rápido, y por otro lado (en otra base o réplica separada) corremos los cálculos pesados sin molestar a los usuarios.
-
----
-
-### CRN-4: Modularizar para asignación de trabajo y documentación ADR
-* **¿Qué es?**  
-  Separar el sistema en partes claras e independientes para que los miembros del grupo puedan repartirse las tareas sin pisarse el código, dejando asentadas las decisiones importantes.
-* **Impacto en el diseño:**  
-  Permite que cada integrante se haga responsable de un módulo o servicio en GitHub, facilitando además justificar cada elección técnica mediante plantillas MADR (*Architectural Decision Records*) como exige la cátedra.
-
----
-
-### CRN-5: Extensibilidad para módulos avanzados (Recomendación / Chatbot)
-* **¿Qué es?**  
-  Dejar la arquitectura preparada desde el día uno para que sumar funciones complejas en el futuro no obligue a romper o rehacer todo lo que ya funciona.
-* **Impacto en el diseño:**  
-  Para la segunda entrega del TPE es obligatorio agregar un *Sistema de Recomendación* o un *Chatbot/Asistente virtual*. Este concern asegura que el núcleo de itinerarios y reservas exponga puntos de conexión limpios donde "enchufar" estos componentes inteligentes de manera aislada.
+| **CRN-1** | Iteración 1 | Estructura general, arquitectura de referencia, conectores y particionamiento macro. |
+| **CRN-2** | Iteración 1 / 2 | Definición de capas de integración, estándares OpenAPI y contratos de API Gateway. |
+| **CRN-3** | Iteración 2 / 3 | Estrategia de bases de datos operativas vs. almacén analítico, mecanismos de sincronización asincrónica. |
+| **CRN-4** | Transversal (1 a 4) | Estructuración modular en repositorios, asignación por componente y generación de ADRs. |
+| **CRN-5** | Iteración 3 / 4 | Puntos de desacople e interfaces de integración para servicios de recomendación/asistente. |
