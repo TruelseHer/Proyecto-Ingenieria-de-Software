@@ -1,5 +1,5 @@
 | ID | Architectural Concern | Descripción Técnica | Impacto Arquitectónico y Estrategia |
-| :--- | :--- | :--- | :--- | :--- |
+| :--- | :--- | :--- | :--- |
 | :--- | :--- | :--- | :--- |
 | **CRN-1** | Establecimiento de la estructura macro inicial (*Greenfield base*) | Definir la organización estructural global, particionamiento de responsabilidades y estilos base para un desarrollo que parte desde cero. | Selección inicial de arquitectura de referencia y estilo arquitectónico (ej. microservicios / servicios distribuidos desacoplados) en la Iteración 1 de ADD. 
 | **CRN-2** | Adopción de *Spec-Driven Development* y gobernanza de interfaces | Estandarización previa y estricta de contratos de interfaz (APIs) antes de iniciar la implementación y construcción de prototipos. | 
