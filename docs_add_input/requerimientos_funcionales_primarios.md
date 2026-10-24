@@ -69,6 +69,7 @@
 -  En plataformas móviles, el despliegue del contenido inicial (*First Contentful Paint*) del panel de viajes no supera los **1.4 segundos**.
 -  El usuario puede navegar, consultar y restaurar viajes archivados en cualquier momento desde una sección dedicada.
 
+---
   
 ### US-06: Asistencia y Resolución de Problemas con Agencia Preferida
 
