@@ -49,10 +49,10 @@
 
 #### Criterios de Aceptación
 
-- [ ] La interfaz (web y móvil) provee un formulario estructurado para registrar tipo de transporte/alojamiento, fechas, locaciones y notas.
-- [ ] En la aplicación web, el tiempo de respuesta al guardar o actualizar una reserva es de **800 ms o menor**.
-- [ ] La eliminación de un ítem solicita confirmación previa y actualiza de inmediato el cálculo temporal del itinerario.
-- [ ] Los campos modificados de forma manual quedan marcados para evitar ser sobrescritos por sincronizaciones automáticas posteriores.
+-  La interfaz (web y móvil) provee un formulario estructurado para registrar tipo de transporte/alojamiento, fechas, locaciones y notas.
+-  En la aplicación web, el tiempo de respuesta al guardar o actualizar una reserva es de **800 ms o menor**.
+-  La eliminación de un ítem solicita confirmación previa y actualiza de inmediato el cálculo temporal del itinerario.
+-  Los campos modificados de forma manual quedan marcados para evitar ser sobrescritos por sincronizaciones automáticas posteriores.
 
 ---
 
@@ -64,9 +64,37 @@
 
 #### Criterios de Aceptación
 
-- [ ] Las reservas con continuidad cronológica y de ubicación se asocian de forma automática bajo un mismo "Viaje" (permitiendo ajustes manuales de agrupación).
-- [ ] Al cumplirse la fecha y hora del último evento del itinerario, el viaje se retira de la pantalla principal y pasa a la vista de "Archivados".
-- [ ] En plataformas móviles, el despliegue del contenido inicial (*First Contentful Paint*) del panel de viajes no supera los **1.4 segundos**.
-- [ ] El usuario puede navegar, consultar y restaurar viajes archivados en cualquier momento desde una sección dedicada.
+-  Las reservas con continuidad cronológica y de ubicación se asocian de forma automática bajo un mismo "Viaje" (permitiendo ajustes manuales de agrupación).
+-  Al cumplirse la fecha y hora del último evento del itinerario, el viaje se retira de la pantalla principal y pasa a la vista de "Archivados".
+-  En plataformas móviles, el despliegue del contenido inicial (*First Contentful Paint*) del panel de viajes no supera los **1.4 segundos**.
+-  El usuario puede navegar, consultar y restaurar viajes archivados en cualquier momento desde una sección dedicada.
+
+  
+### US-06: Asistencia y Resolución de Problemas con Agencia Preferida
+
+* **Como** viajero afectado por una disrupción o cancelación,  
+* **Quiero** conectar directamente una reserva problemática con mi agencia de viajes preferida desde el panel,  
+* **Para** agilizar la resolución de incidentes, reprogramaciones y reclamos con un operador de asistencia.  
+
+#### Criterios de Aceptación
+
+-  El usuario puede vincular y configurar su agencia de cabecera en el perfil de usuario.
+-  Frente a una contingencia (vuelo cancelado, hotel sobrevendido), la interfaz presenta un acceso directo ("Solicitar resolución").
+- Al iniciar la solicitud, el sistema transfiere de forma segura el contexto del viaje y códigos de reserva a la API de la agencia, evitando la reintroducción de datos.
+-  El usuario recibe y visualiza un identificador de ticket o estado del trámite directamente sobre la tarjeta de la reserva.
 
 ---
+
+### US-07: Recopilación y Consulta de Datos Analíticos (Monetización)
+
+* **Como** analista del equipo de datos de Trotamundos,  
+* **Quiero** que el sistema registre y consolide métricas de viajes (destinos, tendencias, cancelaciones) de forma anonimizada,  
+* **Para** ejecutar consultas analíticas pesadas orientadas a monetización sin degradar la experiencia de los usuarios activos.  
+
+#### Criterios de Aceptación
+
+-  La captura y envío de eventos analíticos se realiza de forma asíncrona para no penalizar la latencia operativa ni el rendimiento bajo picos de carga (2 millones de usuarios activos semanales).
+-  Todos los datos recopilados se anonimizan, desasociando información personal identificable (PII) según los requisitos de seguridad y privacidad.
+-  Las consultas complejas y pesadas se dirigen a un repositorio de datos analítico segregado (CQRS / Data Warehouse), preservando la disponibilidad del sistema transaccional.
+-  Se habilitan vistas y reportes por rangos temporales, destinos con mayor demanda y tasas de contingencias por aerolínea/proveedor.
+
