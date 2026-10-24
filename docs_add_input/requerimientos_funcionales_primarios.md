@@ -41,6 +41,8 @@
 *    El subsistema de integración implementa políticas de reintentos y tolerancia a fallos ante caídas o lentitud de proveedores externos.
 *    Las reservas con estados especiales (reprogramado, demorado, cancelado) se visualizan con indicadores claros de alerta en el panel.
 
+---
+
 ### US-04: Gestión Manual de Reservas
 
 * **Como** usuario del panel de Trotamundos,  
