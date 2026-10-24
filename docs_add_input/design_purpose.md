@@ -1,3 +1,3 @@
-** Contexto de Desarrollo: Se trata de un sistema Greenfield (empezado desde cero).
+* Contexto de Desarrollo: Se trata de un sistema Greenfield (empezado desde cero).
 
-** Objetivo de alcance: Diseño de prototipo.
+* Objetivo de alcance: Diseño de prototipo.
