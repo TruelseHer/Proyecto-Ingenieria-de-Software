@@ -40,3 +40,33 @@
 *    Cualquier actualización o cancelación informada por la fuente externa impacta en la vista del usuario en un tiempo menor o igual a **5 minutos**.
 *    El subsistema de integración implementa políticas de reintentos (_backoff_ exponencial) y tolerancia a fallos ante caídas o lentitud de proveedores externos.
 *    Las reservas con estados especiales (reprogramado, demorado, cancelado) se visualizan con indicadores claros de alerta en el panel.
+
+### US-04: Gestión Manual de Reservas
+
+* **Como** usuario del panel de Trotamundos,  
+* **Quiero** crear, modificar o eliminar reservas de manera manual,  
+* **Para** gestionar arreglos de viaje informales o de proveedores que no ofrecen integraciones por API ni confirmaciones por correo escaneables.  
+
+#### Criterios de Aceptación
+
+- [ ] La interfaz (web y móvil) provee un formulario estructurado para registrar tipo de transporte/alojamiento, fechas, locaciones y notas.
+- [ ] En la aplicación web, el tiempo de respuesta al guardar o actualizar una reserva es de **800 ms o menor**.
+- [ ] La eliminación de un ítem solicita confirmación previa y actualiza de inmediato el cálculo temporal del itinerario.
+- [ ] Los campos modificados de forma manual quedan marcados para evitar ser sobrescritos por sincronizaciones automáticas posteriores.
+
+---
+
+### US-05: Agrupación y Ciclo de Vida del Viaje
+
+* **Como** viajero recurrente,  
+* **Quiero** que mis reservas se organicen por viaje y que los viajes completados se archiven automáticamente,  
+* **Para** mantener una interfaz limpia y centrada exclusivamente en los desplazamientos actuales y próximos.  
+
+#### Criterios de Aceptación
+
+- [ ] Las reservas con continuidad cronológica y de ubicación se asocian de forma automática bajo un mismo "Viaje" (permitiendo ajustes manuales de agrupación).
+- [ ] Al cumplirse la fecha y hora del último evento del itinerario, el viaje se retira de la pantalla principal y pasa a la vista de "Archivados".
+- [ ] En plataformas móviles, el despliegue del contenido inicial (*First Contentful Paint*) del panel de viajes no supera los **1.4 segundos**.
+- [ ] El usuario puede navegar, consultar y restaurar viajes archivados en cualquier momento desde una sección dedicada.
+
+---
