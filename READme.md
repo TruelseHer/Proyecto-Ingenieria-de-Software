@@ -1,4 +1,4 @@
-# Indice General
+# Indice General - Sistema "Trotamundos"
 1. Inputs:
       - [arbol de utilidad.md](docs_add_input/arbol_de_utilidad.md)
       - [atributos de calidad.md](docs_add_input/atributos_de_calidad.md)
