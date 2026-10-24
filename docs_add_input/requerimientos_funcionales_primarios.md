@@ -36,9 +36,9 @@
 
 #### Criterios de Aceptación
 
-*    Las integraciones se estructuran mediante contratos formales (OpenAPI / JSON Schema) siguiendo la metodología _Spec-driven_.
+*    Las integraciones se estructuran mediante contratos formales  siguiendo la metodología _Spec-driven_.
 *    Cualquier actualización o cancelación informada por la fuente externa impacta en la vista del usuario en un tiempo menor o igual a **5 minutos**.
-*    El subsistema de integración implementa políticas de reintentos (_backoff_ exponencial) y tolerancia a fallos ante caídas o lentitud de proveedores externos.
+*    El subsistema de integración implementa políticas de reintentos y tolerancia a fallos ante caídas o lentitud de proveedores externos.
 *    Las reservas con estados especiales (reprogramado, demorado, cancelado) se visualizan con indicadores claros de alerta en el panel.
 
 ### US-04: Gestión Manual de Reservas
