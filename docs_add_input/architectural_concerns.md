@@ -1,8 +1,8 @@
-| ID | Architectural Concern | Descripción Técnica | Impacto Arquitectónico y Estrategia |
-| :--- | :--- | :--- | :--- |
+| ID | Architectural Concern | Descripción Técnica |
+| :--- | :--- | :--- | 
 | **CRN-1** | Establecimiento de la estructura macro inicial (*Greenfield base*) | Definir la organización estructural global, particionamiento de responsabilidades y estilos base para un desarrollo que parte desde cero. | Selección inicial de arquitectura de referencia y estilo arquitectónico (ej. microservicios / servicios distribuidos desacoplados) en la Iteración 1 de ADD. 
-| **CRN-2** | Adopción de *Spec-Driven Development* y gobernanza de interfaces | Estandarización previa y estricta de contratos de interfaz (APIs) antes de iniciar la implementación y construcción de prototipos. | Establecimiento de especificaciones formales (OpenAPI / AsyncAPI), desacoplamiento entre frontend/backend mediante dobles de prueba (*mocks*) y verificación de cumplimiento de contratos con sistemas externos. |
-| **CRN-3** | Segregación de procesamiento analítico y transaccional | Desacoplamiento entre la persistencia operativa de reservas en tiempo real y la ejecución de consultas analíticas pesadas para monetización. | Adopción de patrones de segregación de responsabilidades de consulta y comando (ej. réplicas de solo lectura / CQRS / pipelines de streaming asincrónicos) para evitar degradación de latencia en la experiencia del usuario. 
-| **CRN-4** | Modularización para distribución de trabajo y gobernanza ADR | Organización de subsistemas y módulos alineados a la estructura del equipo, permitiendo desarrollo concurrente y trazabilidad formal de decisiones. | Definición de límites de módulos con dependencias explícitas (alineado a la Ley de Conway) y obligatoriedad de captura de decisiones mediante plantillas MADR (*Markdown Architectural Decision Records*). 
-| **CRN-5** | Extensibilidad para integración de módulos avanzados (Entrega 2) | Provisión de puntos de extensión desacoplados para incorporar capacidades avanzadas (Sistema de recomendación personalizada o Asistente virtual / Chatbot) sin refactorizaciones del núcleo transaccional. | Diseño de interfaces de extensión y comunicación orientada a eventos para permitir el *plugging* independiente de componentes inteligentes futuros.
+| **CRN-2** | Adopción de *Spec-Driven Development* y gobernanza de interfaces | 
+| **CRN-3** | Segregación de procesamiento analítico y transaccional |
+| **CRN-4** | Modularización para distribución de trabajo y gobernanza ADR |  
+| **CRN-5** | Extensibilidad para integración de módulos avanzados (Entrega 2) |
 
