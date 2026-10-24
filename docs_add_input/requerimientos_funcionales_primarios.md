@@ -6,7 +6,7 @@
 
 #### Criterios de Aceptación
 
-*    El sistema solicita autorización explícita (OAuth 2.0 / tokens seguros) para acceder a la bandeja del proveedor de correo, garantizando la privacidad y seguridad de la información.
+*    El sistema solicita autorización explícita  para acceder a la bandeja del proveedor de correo, garantizando la privacidad y seguridad de la información.
 *    El motor de extracción identifica y parsea datos clave: localizador/PNR, fechas, horas, origen, destino, tipo de servicio y proveedor.
 *    Toda reserva detectada debe reflejarse en el itinerario de la aplicación dentro de los **5 minutos** posteriores a la recepción del correo.
 *    Si un correo no corresponde a una reserva válida o estructurada, se descarta sin almacenar ni exponer el contenido del mensaje.
