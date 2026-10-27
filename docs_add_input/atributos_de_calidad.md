@@ -1,4 +1,5 @@
-# Escenarios de atributos de calidad con la plantilla SEI
+# Escenarios de atributos de calidad - Sistema "Trotamundos" 
+Utilizando la plantilla SEI
 
 ## 1\. **Rendimiento (Performance)**
 
