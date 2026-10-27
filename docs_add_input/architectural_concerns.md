@@ -1,3 +1,5 @@
+# Incumbencias Arquitectonicas - Sistema "Trotamundos"
+
 | ID | Architectural Concern | Descripción Técnica |
 | :--- | :--- | :--- |
 | **CRN-1** | Establecimiento de la estructura macro inicial (*Greenfield base*) | Definir la organización estructural global, particionamiento de responsabilidades y estilos base para un desarrollo que parte desde cero. |
