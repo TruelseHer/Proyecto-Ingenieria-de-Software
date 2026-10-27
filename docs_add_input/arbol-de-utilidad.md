@@ -4,9 +4,9 @@ Documento de consolidación y priorización arquitectónica siguiendo el estánd
 
 ---
 
-## 1. Estructura Jerárquica del Árbol de Utilidad
+## 1\. Estructura Jerárquica del Árbol de Utilidad
 
-```text
+```
 Utilidad (Trotamundos)
 |
 +-- Rendimiento (Performance)
@@ -44,50 +44,50 @@ Utilidad (Trotamundos)
 
 ---
 
-## 2. Tabla Detallada de Hojas y Priorización
+## 2\. Tabla Detallada de Hojas y Priorización
 
-| Atributo de Calidad | Sub-refinamiento | ID Escenario | Hoja del Árbol (Estímulo + Respuesta) | Importancia | Dificultad | Prioridad Final |
-| --- | --- | --- | --- | --- | --- | --- |
-| **Rendimiento** | Latencia de Integración Externa | `A1R-E1` | Ante publicación de alojamiento en servicio externo, procesar y notificar al usuario en $\le$ 5 min (registro en $\le$ 2 min). | Media* | Media* | **(M, M)** |
-| **Rendimiento** | Tiempo de Respuesta Web | `A1R-E2` | Ante navegación web del usuario, entregar contenido sugerido con latencia $\le$ 800 ms. | Alta | Baja* | **(A, B)** |
-| **Rendimiento** | Experiencia de Carga Móvil | `A1R-E3` | Ante apertura o navegación en la app móvil, renderizar el primer contenido visual (FCP) en $<$ 1.4 s. | Media* | Media* | **(M, M)** |
-| **Disponibilidad** | Tolerancia a Fallas en Infraestructura | `A2D-E1` | Ante caída de infraestructura o base de datos, enruta automáticamente el tráfico hacia un servidor de respaldo (failover) preservando la sesión con indisponibilidad $\le$ 5 min/mes. | Alta | Alta* | **(A, A)** |
-| **Escalabilidad** | Capacidad de Carga y Autoescalado | `A3E-E1` | Ante evento disruptivo con pico del +500% de tráfico, La plataforma escala horizontalmente aprovisionando de manera automática nuevas instancias de servidores y equilibrando la carga para procesar las peticiones simultáneas sin degradar el servicio, cargando páginas en $<$ 3 s sin fallos. | Alta | Alta* | **(A, A)** |
-| **Interoperabilidad** | Ingesta y Cruce de Reservas | `A4I-E1` | Ante recepción de confirmaciones por email, autenticar, extraer y cruzar datos vía APIs con 100% de precisión automática. | Alta | Media* | **(A, M)** |
-| **Seguridad** | Control de Acceso y Privacidad | `A5S-E1` | Ante intentos de acceso no autorizado a correos/itinerarios, denegar el 100%, enmascarar datos y auditar. | Alta | Media* | **(A, M)** |
-| **Evolucionabilidad** | Extensibilidad de Nuevos Transportes | `A6E-E1` | Ante solicitud de incorporar trenes/buses, construir módulos aislados (Spec-driven y ADRs) en $<$ 2 sprints sin tocar módulos core. | Media* | Media* | **(M, M)** |
-| **Usabilidad** | Adaptabilidad y Localización | `A7U-E1` | Ante uso en el extranjero, leer GPS y presentar indicaciones localizadas (mapa, moneda, hora) en $<$ 2 s y $\le$ 3 clics. | Media* | Baja* | **(M, B)** |
+| Atributo de Calidad   | Sub-refinamiento                       | ID Escenario | Hoja del Árbol (Estímulo + Respuesta)                                                                                                                                                                                                                                                              | Importancia | Dificultad | Prioridad Final |
+|-----------------------|----------------------------------------|--------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|------------|-----------------|
+| **Rendimiento**       | Latencia de Integración Externa        | `A1R-E1`     | Ante publicación de alojamiento en servicio externo, procesar y notificar al usuario en $\\le$ 5 min (registro en $\\le$ 2 min).                                                                                                                                                                   | Media\*     | Media\*    | **(M, M)**      |
+| **Rendimiento**       | Tiempo de Respuesta Web                | `A1R-E2`     | Ante navegación web del usuario, entregar contenido sugerido con latencia $\\le$ 800 ms.                                                                                                                                                                                                           | Alta        | Baja\*     | **(A, B)**      |
+| **Rendimiento**       | Experiencia de Carga Móvil             | `A1R-E3`     | Ante apertura o navegación en la app móvil, renderizar el primer contenido visual (FCP) en $\<$ 1.4 s.                                                                                                                                                                                             | Media\*     | Media\*    | **(M, M)**      |
+| **Disponibilidad**    | Tolerancia a Fallas en Infraestructura | `A2D-E1`     | Ante caída de infraestructura o base de datos, enruta automáticamente el tráfico hacia un servidor de respaldo (failover) preservando la sesión con indisponibilidad $\\le$ 5 min/mes.                                                                                                             | Alta        | Alta\*     | **(A, A)**      |
+| **Escalabilidad**     | Capacidad de Carga y Autoescalado      | `A3E-E1`     | Ante evento disruptivo con pico del +500% de tráfico, La plataforma escala horizontalmente aprovisionando de manera automática nuevas instancias de servidores y equilibrando la carga para procesar las peticiones simultáneas sin degradar el servicio, cargando páginas en $\<$ 3 s sin fallos. | Alta        | Alta\*     | **(A, A)**      |
+| **Interoperabilidad** | Ingesta y Cruce de Reservas            | `A4I-E1`     | Ante recepción de confirmaciones por email, autenticar, extraer y cruzar datos vía APIs con 100% de precisión automática.                                                                                                                                                                          | Alta        | Media\*    | **(A, M)**      |
+| **Seguridad**         | Control de Acceso y Privacidad         | `A5S-E1`     | Ante intentos de acceso no autorizado a correos/itinerarios, denegar el 100%, enmascarar datos y auditar.                                                                                                                                                                                          | Alta        | Media\*    | **(A, M)**      |
+| **Evolucionabilidad** | Extensibilidad de Nuevos Transportes   | `A6E-E1`     | Ante solicitud de incorporar trenes/buses, construir módulos aislados (Spec-driven y ADRs) en $\<$ 2 sprints sin tocar módulos core.                                                                                                                                                               | Media\*     | Media\*    | **(M, M)**      |
+| **Usabilidad**        | Adaptabilidad y Localización           | `A7U-E1`     | Ante uso en el extranjero, leer GPS y presentar indicaciones localizadas (mapa, moneda, hora) en $\<$ 2 s y $\\le$ 3 clics.                                                                                                                                                                        | Media\*     | Baja\*     | **(M, B)**      |
 
-*\* Clasificado como supuesto justificado al no venir prefijado por el enunciado original.*
+_\* Clasificado como supuesto justificado al no venir prefijado por el enunciado original._
 
 ---
 
-## 3. Justificación de Prioridades (Importancia, Dificultad)
+## 3\. Justificación de Prioridades (Importancia, Dificultad)
 
-- **[A1R-E2] Tiempo de Respuesta Web (Alta, Baja):**
-  - *Importancia (Alta):* Impacta de forma inmediata en la retención y conversión del usuario en la web principal.
-  - *Dificultad (Baja):* Se aborda mediante tácticas consolidadas de caching distribuido (CDN, Redis) y optimización de assets.
-- **[A2D-E1] Tolerancia a Fallas (Alta, Alta):**
-  - *Importancia (Alta):* Una tolerancia máxima de 5 min/mes equivale a un 99.99% de disponibilidad (SLA crítico para viajeros en tránsito).
-  - *Dificultad (Alta):* Requiere infraestructura multizona, replicación continua de base de datos y preservación de estado de sesión durante el failover.
-- **[A3E-E1] Capacidad ante Picos (Alta, Alta):**
-  - *Importancia (Alta):* El sistema debe operar con 15 millones de cuentas y 2 millones de usuarios activos semanales, respondiendo ante crisis masivas.
-  - *Dificultad (Alta):* Absorber picos súbitos del +500% demanda desacoplamiento asíncrono con colas elásticas, sharding y políticas de autoescalado horizontal rápido.
-- **[A4I-E1] Ingesta de Reservas (Alta, Media):**
-  - *Importancia (Alta):* Representa el valor diferencial de la plataforma (centralizador automático de viajes sin carga manual).
-  - *Dificultad (Media):* Requiere adaptadores modulares para tolerar variaciones sintácticas y semánticas de múltiples proveedores y formatos de correo.
-- **[A5S-E1] Control de Acceso (Alta, Media):**
-  - *Importancia (Alta):* Manejo de datos personales (PII) e itinerarios privados con exigencias normativas estrictas.
-  - *Dificultad (Media):* Implementación de esquemas de autorización por atributos/roles (ABAC/RBAC) y encriptación de datos en reposo y tránsito.
-- **[A1R-E1] Latencia de Integración Externa (Media, Media):**
-  - *Importancia (Media):* Proceso asíncrono en segundo plano; unos minutos de holgura no degradan la experiencia interactiva del usuario.
-  - *Dificultad (Media):* Requiere colas de mensajería y control de tasa (rate limiting) para interactuar con servicios de terceros.
-- **[A1R-E3] Carga Móvil (Media, Media):**
-  - *Importancia (Media):* Crítica para la experiencia en apps, pero mitigable con renderizado progresivo y estados de carga (skeletons).
-  - *Dificultad (Media):* Implica optimización del bundle móvil, carga diferida y soporte de condiciones de red variables.
-- **[A6E-E1] Extensibilidad Transportes (Media, Media):**
-  - *Importancia (Media):* Driver a mediano plazo para la evolución del negocio que no condiciona el MVP inicial.
-  - *Dificultad (Media):* Se mitiga con diseño desacoplado guiado por contratos (Spec-driven) y microservicios independientes.
-- **[A7U-E1] Adaptabilidad y Localización (Media, Baja):**
-  - *Importancia (Media):* Mejora la satisfacción en destino del viajero internacional.
-  - *Dificultad (Baja):* Tecnologías móviles estándar resuelven nativamente la geolocalización y bibliotecas de formato resuelven i18n/moneda.
+*   **\[A1R-E2\] Tiempo de Respuesta Web (Alta, Baja):**
+    *   _Importancia (Alta):_ Impacta de forma inmediata en la retención y conversión del usuario en la web principal.
+    *   _Dificultad (Baja):_ Se aborda mediante tácticas consolidadas de caching distribuido (CDN, Redis) y optimización de assets.
+*   **\[A2D-E1\] Tolerancia a Fallas (Alta, Alta):**
+    *   _Importancia (Alta):_ Una tolerancia máxima de 5 min/mes equivale a un 99.99% de disponibilidad (SLA crítico para viajeros en tránsito).
+    *   _Dificultad (Alta):_ Requiere infraestructura multizona, replicación continua de base de datos y preservación de estado de sesión durante el failover.
+*   **\[A3E-E1\] Capacidad ante Picos (Alta, Alta):**
+    *   _Importancia (Alta):_ El sistema debe operar con 15 millones de cuentas y 2 millones de usuarios activos semanales, respondiendo ante crisis masivas.
+    *   _Dificultad (Alta):_ Absorber picos súbitos del +500% demanda desacoplamiento asíncrono con colas elásticas, sharding y políticas de autoescalado horizontal rápido.
+*   **\[A4I-E1\] Ingesta de Reservas (Alta, Media):**
+    *   _Importancia (Alta):_ Representa el valor diferencial de la plataforma (centralizador automático de viajes sin carga manual).
+    *   _Dificultad (Media):_ Requiere adaptadores modulares para tolerar variaciones sintácticas y semánticas de múltiples proveedores y formatos de correo.
+*   **\[A5S-E1\] Control de Acceso (Alta, Media):**
+    *   _Importancia (Alta):_ Manejo de datos personales (PII) e itinerarios privados con exigencias normativas estrictas.
+    *   _Dificultad (Media):_ Implementación de esquemas de autorización por atributos/roles (ABAC/RBAC) y encriptación de datos en reposo y tránsito.
+*   **\[A1R-E1\] Latencia de Integración Externa (Media, Media):**
+    *   _Importancia (Media):_ Proceso asíncrono en segundo plano; unos minutos de holgura no degradan la experiencia interactiva del usuario.
+    *   _Dificultad (Media):_ Requiere colas de mensajería y control de tasa (rate limiting) para interactuar con servicios de terceros.
+*   **\[A1R-E3\] Carga Móvil (Media, Media):**
+    *   _Importancia (Media):_ Crítica para la experiencia en apps, pero mitigable con renderizado progresivo y estados de carga (skeletons).
+    *   _Dificultad (Media):_ Implica optimización del bundle móvil, carga diferida y soporte de condiciones de red variables.
+*   **\[A6E-E1\] Extensibilidad Transportes (Media, Media):**
+    *   _Importancia (Media):_ Driver a mediano plazo para la evolución del negocio que no condiciona el MVP inicial.
+    *   _Dificultad (Media):_ Se mitiga con diseño desacoplado guiado por contratos (Spec-driven) y microservicios independientes.
+*   **\[A7U-E1\] Adaptabilidad y Localización (Media, Baja):**
+    *   _Importancia (Media):_ Mejora la satisfacción en destino del viajero internacional.
+    *   _Dificultad (Baja):_ Tecnologías móviles estándar resuelven nativamente la geolocalización y bibliotecas de formato resuelven i18n/moneda.
