@@ -1,3 +1,5 @@
+# Restricciones - Sistema "Trotamundos"
+
 | ID | Restricción (*Constraint*) | Categoría | Justificación | Impacto en las Decisiones de Diseño |
 | :--- | :--- | :--- | :--- | :--- |
 | **CON-1** | **Soporte de clientes Web y Móvil nativo** | Plataforma / Ejecución | Requerimiento de acceso vía navegadores modernos de escritorio y dispositivos móviles con capacidades de geolocalización (GPS). | La arquitectura debe proveer capas de interfaces/APIs que permitan servir ambos tipos de clientes sin duplicar la lógica de negocio. | 
