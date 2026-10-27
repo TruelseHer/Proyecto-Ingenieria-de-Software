@@ -1,3 +1,5 @@
+# Requerimientos Funcionales Primarios - Sistema "Trotamundos"
+
 ### US-01: Procesamiento y Escaneo Automático de Correos
 
 *   **Como** viajero registrado en Trotamundos,
