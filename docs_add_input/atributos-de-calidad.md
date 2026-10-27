@@ -3,21 +3,21 @@ Utilizando la plantilla SEI
 
 ## 1\. **Rendimiento (Performance)**
 
-*   **A1R-E1 Escenario 1: Notificación de Alojamiento Disponible (Integración Externa)**
+*   **QA-1-E1 Escenario 1: Notificación de Alojamiento Disponible (Integración Externa)**
     *   **Fuente del estímulo:** Servicio externo de reserva (ej. Booking).
     *   **Estímulo:** Se publica un alojamiento como disponible en la ubicación y fecha de un posible viaje.
     *   **Ambiente (Contexto operativo):** Operación normal del sistema en el chequeo de servicios externos.
     *   **Artefacto:** Módulo de gestión de servicios externos.
     *   **Respuesta:** El sistema gestiona eficientemente los elementos ingresados en las apps externas para sugerir al usuario.
     *   **Medida de la respuesta:** El tiempo transcurrido entre el evento y la respuesta es como máximo de **5 minutos**. El tiempo entre el estímulo externo y el registro de dicho evento es como máximo de **2 minutos**.
-*   **A1R-E2 Escenario 2: Navegación de Paquetes de Viaje en la Web**
+*   **QA-1-E2 Escenario 2: Navegación de Paquetes de Viaje en la Web**
     *   **Fuente del estímulo:** Usuario navegando desde un navegador web.
     *   **Estímulo:** El usuario navega y quiere explorar opciones de paquetes de viaje.
     *   **Ambiente (Contexto operativo):** Operación normal (solicitudes de ingreso al sistema).
     *   **Artefacto:** Módulo de gestión de solicitudes de ingreso al sitio.
     *   **Respuesta:** El sistema despliega contenido sugerido según la identidad del usuario.
     *   **Medida de la respuesta:** El tiempo de respuesta desde el navegador web del usuario debe ser de **800 ms o menos**.
-*   **A1R-E3 Escenario 3: Acceso y Primer Renderizado en la Aplicación Móvil**
+*   **QA-1-E3 Escenario 3: Acceso y Primer Renderizado en la Aplicación Móvil**
     *   **Fuente del estímulo:** Usuario final operando desde un dispositivo móvil.
     *   **Estímulo:** Solicitud de acceso a la plataforma o navegación hacia una vista/pantalla principal en la aplicación móvil.
     *   **Ambiente (Contexto operativo):** Aplicación móvil del sistema Trotamundos en tiempo de ejecución (_runtime_) bajo condiciones normales de red móvil (ej. 4G/5G).
@@ -27,7 +27,7 @@ Utilizando la plantilla SEI
 
 ## 2\. **Disponibilidad (Availability)**
 
-*   **A2D-E1 Escenario 1: Tolerancia a Fallas en Infraestructura Crítica**
+*   **QA-2 Escenario 1: Tolerancia a Fallas en Infraestructura Crítica**
     *   **Fuente del estímulo:** Falla interna del sistema o caída de la infraestructura (ej. nodo de servidor o base de datos).
     *   **Estímulo:** Un componente crítico del sistema se cae inesperadamente, interrumpiendo el servicio normal.
     *   **Ambiente (Contexto operativo):** Operación normal con carga global de usuarios concurrentes.
@@ -37,7 +37,7 @@ Utilizando la plantilla SEI
 
 ## 3\. Escalabilidad (Scalability)
 
-*   **A3E-E1** _**Escenario 1 :** La plataforma debe dimensionarse para soportar una base de 15 millones de cuentas, operando con 2 millones de usuarios activos semanales y soportando dramáticos picos de tráfico ante eventos disruptivos masivos._
+*   **QA-3** _**Escenario 1 :** La plataforma debe dimensionarse para soportar una base de 15 millones de cuentas, operando con 2 millones de usuarios activos semanales y soportando dramáticos picos de tráfico ante eventos disruptivos masivos._
     *   **Fuente del estímulo:** Usuarios del sistema (viajeros).
     *   **Estímulo:** Ocurre un evento disruptivo masivo (ej. tormenta global que cancela vuelos), generando un pico dramático repentino de usuarios ingresando a la plataforma para reprogramar sus itinerarios.
     *   **Artefacto:** Capa de servicios y base de datos de la plataforma.
@@ -47,7 +47,7 @@ Utilizando la plantilla SEI
 
 ## 4\. Interoperabilidad (Interoperability)
 
-*   **A4I-E1** _**Escenario 1:** Integración fluida con intercambios de aerolíneas, hoteles y arrendadoras a través de APIs estándar, además de interoperar con proveedores de correo y redes sociales._
+*   **QA-4** _**Escenario 1:** Integración fluida con intercambios de aerolíneas, hoteles y arrendadoras a través de APIs estándar, además de interoperar con proveedores de correo y redes sociales._
     *   **Fuente del estímulo:** Sistemas externos (APIs de Aerolíneas/Hoteles, Proveedores de Correo Electrónico).
     *   **Estímulo:** El usuario recibe un correo electrónico con una confirmación de reserva que el sistema debe procesar.
     *   **Artefacto:** Módulo de integraciones, escaneo de correos y adaptadores de API.
@@ -57,7 +57,7 @@ Utilizando la plantilla SEI
 
 ## 5\. Seguridad y Privacidad (Security)
 
-*   **A5S-E1** _**Escenario 1:** El sistema procesa información personal. Debe garantizarse el acceso seguro y autorizado a los correos, y permitir el uso compartido de itinerarios asegurando que solo personas específicas designadas puedan visualizarlos._
+*   **QA-5** _**Escenario 1:** El sistema procesa información personal. Debe garantizarse el acceso seguro y autorizado a los correos, y permitir el uso compartido de itinerarios asegurando que solo personas específicas designadas puedan visualizarlos._
     *   **Fuente del estímulo:** Usuario malintencionado / Atacante externo.
     *   **Estímulo:** Intento de acceso a un itinerario compartido utilizando un enlace modificado o intento de lectura de correos sin tener los privilegios adecuados.
     *   **Artefacto:** Componente de Autenticación y Control de Acceso (Autorización).
@@ -67,7 +67,7 @@ Utilizando la plantilla SEI
 
 ## 6\. Evolucionabilidad y Mantenibilidad (Evolvability)
 
-*   **A6E-E1** _**Escenario 1:** La arquitectura debe prever la integración futura de otros medios de transporte (trenes, autobuses, etc.). Apoyándose en el uso de ADRs y contratos (Spec-driven), el diseño general y el prototipo final deben exhibir una alta trazabilidad._
+*   **QA-6** _**Escenario 1:** La arquitectura debe prever la integración futura de otros medios de transporte (trenes, autobuses, etc.). Apoyándose en el uso de ADRs y contratos (Spec-driven), el diseño general y el prototipo final deben exhibir una alta trazabilidad._
     *   **Fuente del estímulo:** Equipo de desarrollo / Arquitectura.
     *   **Estímulo:** La gerencia aprueba la iniciativa de agregar servicios de "Autobuses y Trenes" a la plataforma existente.
     *   **Artefacto:** Arquitectura de software, repositorios de código, documentación (ADRs) y contratos de API.
@@ -77,7 +77,7 @@ Utilizando la plantilla SEI
 
 ## 7\. Usabilidad (Usability) e Internacionalización
 
-*   _**Escenario 1:** Se requiere una interfaz rica (aprovechando capacidades nativas como GPS en móviles) y el sistema debe estar preparado arquitectónicamente para operar en el mercado internacional (multiregión)._
+*  **QA-7** _**Escenario 1:** Se requiere una interfaz rica (aprovechando capacidades nativas como GPS en móviles) y el sistema debe estar preparado arquitectónicamente para operar en el mercado internacional (multiregión)._
     *   **Fuente del estímulo:** Usuario internacional utilizando la aplicación móvil.
     *   **Estímulo:** Un usuario viaja desde EE. UU. a Japón y abre la aplicación para buscar cómo llegar a su hotel desde su ubicación actual.
     *   **Artefacto:** Interfaz de usuario de la aplicación móvil (UI/UX) y motor de internacionalización (i18n).
