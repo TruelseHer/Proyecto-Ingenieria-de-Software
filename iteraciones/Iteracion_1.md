@@ -109,7 +109,7 @@ En este paso se formalizan los conceptos arquitectónicos (patrones, estilos y t
 
 * De los ADR-01 al ADR-04 corresponden a la Iteración 1
 
-[ADR-01](./adr/ADRS.md#adr-01-seleccion-del-estilo-macro-arquitectonico-basado-en-microservicios-agrupados-por-rol-carga)
+[ADR-01](./adr/ADRS.md#https://github.com/TruelseHer/Proyecto-Ingenieria-de-Software/blob/main/adr/ADRS.md#adr-01-selecci%C3%B3n-del-estilo-macro-arquitect%C3%B3nico-basado-en-microservicios-agrupados-por-rolcarga)
 
 * Vistas  
   * Vista 1 C\&C  
