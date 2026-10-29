@@ -84,11 +84,11 @@ Definición Formal de Interfaces y Gobernanza Contractual (*Spec-Driven Developm
 
 En cumplimiento de la consigna contractual, se formalizan las especificaciones de interfaz que rigen la interacción entre módulos previo a su implementación:
 
-1. Contrato REST Síncrono: TravelCoreAPI.yaml (Especificación OpenAPI 3.0)  
-2. Contrato Asíncrono de Eventos: ReservationDetectedEvent (JSON Schema / AsyncAPI)  
-3. Configuración Externalizada: EnvironmentConfigProfile
+[1. Contrato REST Síncrono: TravelCoreAPI.yaml (Especificación OpenAPI 3.0)](../spec/Spec-Driven_Devolpement.md#a-contrato-rest-síncrono-travelcoreapiyaml-especificación-openapi-30)  
+[2. Contrato Asíncrono de Eventos: ReservationDetectedEvent (JSON Schema / AsyncAPI)](../spec/Spec-Driven_Devolpement.md#b-contrato-asíncrono-de-eventos-reservationdetectedevent-json-schema--asyncapi)  
+[3. Configuración Externalizada: EnvironmentConfigProfile](../spec/Spec-Driven_Devolpement.md#c-configuración-externalizada-environmentconfigprofile)
 
-[Spec-Driven Development](?tab=t.xvp9bf6elzv9)
+
 
 ## **Paso 6: Vistas y ADR Registrados**
 
