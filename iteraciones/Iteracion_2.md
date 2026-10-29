@@ -94,7 +94,11 @@ En cumplimiento de la consigna contractual, se formalizan las especificaciones d
 
 * De los ADR-05 al ADR-09 corresponden a la iteración 2
 
-[ADRS](?tab=t.czq9tomoknob)
+[ADR-05](../adr/ADRS.md#adr-05-adopción-del-patrón-modelo-de-dominio-enriquecido-rich-domain-model)
+[ADR-06](../adr/ADRS.md#adr-06-estructuración-interna-del-servicio-de-viajes-mediante-service-application-pattern-arquitectura-en-capas)
+[ADR-07](../adr/ADRS.md#adr-07-aislamiento-de-fuentes-externas-mediante-capa-anticorrupción-anti-corruption-layer---acl)
+[ADR-08](../adr/ADRS.md#adr-08-adopción-del-enfoque-contract-first-mediante-openapi-y-asyncapi-spec-driven-development)
+[ADR-09](../adr/ADRS.md#adr-09-selección-de-base-de-datos-relacional-postgresql-para-el-modelo-transaccional-de-viajes)
 
 * Vistas  
   * Vista 1 Clases Core\_travel  

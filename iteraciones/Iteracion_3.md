@@ -151,7 +151,9 @@ public interface AccessControlEngine {
 
 * De los ADR-10 al ADR-12 corresponden a la Iteración 3
 
-[ADRS](?tab=t.czq9tomoknob)
+[ADR-10](../adr/ADRS.md#adr-10-topología-de-base-de-datos-primario-réplica-con-failover-multi-az-y-réplicas-de-lectura)
+[ADR-11](../adr/ADRS.md#adr-11-priorización-de-seguridad-y-validación-criptográfica-en-memoria-en-el-api-gateway)
+[ADR-12](../adr/ADRS.md#adr-12-autoescalado-horizontal-elástico-hpa-y-amortiguación-de-ingesta-mediante-message-broker)
 
 * Vistas  
   * Vista 1 Deployment  

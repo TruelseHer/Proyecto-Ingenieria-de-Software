@@ -109,7 +109,10 @@ En este paso se formalizan los conceptos arquitectónicos (patrones, estilos y t
 
 * De los ADR-01 al ADR-04 corresponden a la Iteración 1
 
-[ADR-01](./adr/ADRS.md#https://github.com/TruelseHer/Proyecto-Ingenieria-de-Software/blob/main/adr/ADRS.md#adr-01-selecci%C3%B3n-del-estilo-macro-arquitect%C3%B3nico-basado-en-microservicios-agrupados-por-rolcarga)
+[ADR-01](../adr/ADRS.md#adr-01-selección-del-estilo-macro-arquitectónico-basado-en-microservicios-agrupados-por-rolcarga)
+[ADR-02](../adr/ADRS.md#adr-02-adopción-del-patrón-edge-api-gateway-con-backend-for-frontend-bff-diferenciado)
+[ADR-03](../adr/ADRS.md#adr-03-desacoplamiento-de-la-ingesta-externa-mediante-conector-message-broker-asynchronous-messaging)
+[ADR-04](../adr/ADRS.md#adr-04-segregación-física-de-almacenes-de-datos-operativo-oltp-y-analítico-olap)
 
 * Vistas  
   * Vista 1 C\&C  

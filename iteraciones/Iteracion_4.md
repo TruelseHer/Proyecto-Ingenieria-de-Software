@@ -126,7 +126,11 @@ D. Especificación Táctica del Circuit Breaker en Ingesta (Configuración de Re
 
 * De los ADR-13  al ADR-17 corresponden a la Iteración 4
 
-[ADRS](?tab=t.czq9tomoknob)
+[ADR-13](../adr/ADRS.md#adr-13-ingesta-analítica-asíncrona-guiada-por-eventos-para-consultas-de-monetización)
+[ADR-14](../adr/ADRS.md#adr-14-anonimización-y-desidentificación-de-datos-en-tránsito-para-el-repositorio-analítico)
+[ADR-15](../adr/ADRS.md#adr-15-desacoplamiento-del-motor-de-recomendaciones-mediante-arquitectura-de-plugins-y-puntos-de-extensión)
+[ADR-16](../adr/ADRS.md#adr-16-resiliencia-de-ingesta-externa-mediante-circuit-breaker-y-dead-letter-queue-dlq)
+[ADR-17](../adr/ADRS.md#adr-17-extensibilidad-de-transportes-mediante-modelo-abiertocerrado-y-contratos-modulares)
 
 * Vistas  
   * Vista 1 C\&C  
