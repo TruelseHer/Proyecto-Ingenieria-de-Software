@@ -59,23 +59,23 @@ En este paso se formalizan los conceptos arquitectónicos (patrones de presentac
 #### **A. Aplicación Híbrida Basada en WebViews Embebidas (Pure Hybrid Webview Wrapper)**
 
 * **Descripción:** Empaquetar una interfaz web responsiva dentro de un contenedor móvil básico y consultar mapas a través de un iframe web.  
-*   
+ 
 * **Motivo de descarte:** Viola la restricción de cliente móvil nativo (**CON-1**). La sobrecarga de inicialización del motor web del dispositivo retrasa el FCP por encima de los 1.4 segundos y genera una experiencia lenta con latencias superiores a 2 segundos en el cálculo interactivo de rutas de mapas, degradando **QA-7**.  
-* 
+
 
 #### **B. Resolución Centralizada de Traducciones y Conversión de Monedas por Cada Interacción (Server-Side UI Formatting)**
 
 * **Descripción:** Enviar al servidor backend cada solicitud de pantalla para que devuelva los textos traducidos y los montos ya formateados con la moneda extranjera.  
-*   
+
 * **Motivo de descarte:** Cada clic requeriría un viaje de red internacional de ida y vuelta (*round-trip latency*), volviendo imposible asegurar indicaciones de ruta y precios en menos de 2 segundos en redes móviles extranjeras, además de sobrecargar los BFFs con responsabilidades puras de presentación.  
-* 
+
 
 #### **C. Sondeo Continuo de Alta Precisión GPS sin Suspensión (Continuous High-Accuracy GPS Polling)**
 
 * **Descripción:** Mantener el chip GPS del dispositivo activo continuamente en segundo plano para registrar cada cambio de posición del usuario.  
-*   
+
 * **Motivo de descarte:** Provoca un consumo acelerado de la batería del dispositivo del viajero y genera bloqueos si la señal satelital se pierde al llegar a aeropuertos o estaciones subterráneas. Se descarta a favor de lecturas bajo demanda (*On-Demand Location Request*) con límites de precisión adaptativos y geocodificación inversa cacheada.  
-* 
+
 
 ## **Paso 5: Instanciar Elementos Arquitectónicos y Asignar Responsabilidades**
 
