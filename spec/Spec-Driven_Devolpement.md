@@ -2,7 +2,7 @@
 
 # **Correspondiente a Iteración 2:**
 
-1. ### Contrato REST Síncrono: TravelCoreAPI.yaml (Especificación OpenAPI 3.0)
+### A. Contrato REST Síncrono: TravelCoreAPI.yaml (Especificación OpenAPI 3.0)
 
 Gobierna la interacción síncrona entre los BFFs perimetrales y el servicio trotamundos.core\_travel:
 
