@@ -104,11 +104,10 @@ C. Interfaz de Cálculo de Ruta: IRouteNavigationEngine
 
 ## **Paso 6: Vistas y ADR Registrados**
 
-* De los ADR-18 a ADR-20 corresponden a la Iteración 5
+* De los ADR-18 a ADR-19 corresponden a la Iteración 5
 
 [ADR-18](../adr/ADRS.md#adr-18-adopción-del-patrón-mvvm-y-abstracción-de-hardware-de-localización-para-la-aplicación-móvil)
 [ADR-19](../adr/ADRS.md#adr-19-localización-e-internacionalización-i18n-híbrida-en-memoria-con-agregación-contextual-en-mobile-bff)
-[ADR-20](../adr/ADRS.md#)
 
 * Vistas  
   * Vista 1 Módulos  
