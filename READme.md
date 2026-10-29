@@ -1,12 +1,12 @@
 # Indice General - Sistema "Trotamundos"
 
 1.  Inputs:
-    * [arbol de utilidad](input/arbol-de-utilidad.md)
-    * [atributos de calidad](input/atributos-de-calidad.md)
-    * [restricciones](input/restricciones.md)
-    * [proposito de diseño](input/proposito-de-dise%C3%B1o.md)
-    * [requerimientos funcionales primarios](input/requerimientos-funcionales-primarios.md)
-    * [incumbencias arquitectonicas](input/incumbencias-arquitectonicas.md)
+    * [arbol de utilidad](inputs/arbol-de-utilidad.md)
+    * [atributos de calidad](inputs/atributos-de-calidad.md)
+    * [restricciones](inputs/restricciones.md)
+    * [proposito de diseño](inputs/proposito-de-dise%C3%B1o.md)
+    * [requerimientos funcionales primarios](inputs/requerimientos-funcionales-primarios.md)
+    * [incumbencias arquitectonicas](inputs/incumbencias-arquitectonicas.md)
 
 2. Iteraciones
     * [Iteracion 1](iteraciones/Iteracion_1.md)
