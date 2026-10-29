@@ -115,12 +115,12 @@ En este paso se instancian los componentes de software, conectores de mensajerí
 ### **2\. Definición Formal de Interfaces y Gobernanza Contractual (*Spec-Driven Development*)**
 
 En cumplimiento estricto del enfoque *Spec-Driven Development* (CRN-2), se especifican las interfaces y contratos canónicos que gobiernan los nuevos elementos instanciados:  
-A. Contrato Asíncrono de Ciclo de Vida: TripLifecycleEvent (JSON Schema / AsyncAPI)  
-B. Contrato OpenAPI del Servicio Analítico de Monetización: AnalyticsAPI.yaml  
-C. Interfaz de Software para Plugins de Recomendación (RecommendationStrategy)  
-D. Especificación Táctica del Circuit Breaker en Ingesta (Configuración de Resiliencia)
 
-[ADRS](?tab=t.czq9tomoknob)
+[A. Contrato Asíncrono de Ciclo de Vida: TripLifecycleEvent (JSON Schema / AsyncAPI)](../spec/Spec-Driven_Devolpement.md#a-contrato-asíncrono-de-ciclo-de-vida-triplifecycleevent-json-schema--asyncapi)  
+[B. Contrato OpenAPI del Servicio Analítico de Monetización: AnalyticsAPI.yaml](../spec/Spec-Driven_Devolpement.md#b-contrato-openapi-del-servicio-analítico-de-monetización-analyticsapiyaml)  
+[C. Interfaz de Software para Plugins de Recomendación (RecommendationStrategy)](../spec/Spec-Driven_Devolpement.md#c-interfaz-de-software-para-plugins-de-recomendación-recommendationstrategy)  
+[D. Especificación Táctica del Circuit Breaker en Ingesta (Configuración de Resiliencia)](../spec/Spec-Driven_Devolpement.md#d-especificación-táctica-del-circuit-breaker-en-ingesta-configuración-de-resiliencia)
+
 
 ## **Paso 6: Vistas y ADR Registrados**
 
