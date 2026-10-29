@@ -96,11 +96,9 @@ En este paso se instancian los módulos de software del cliente móvil (trotamun
 
 ### **2\. Definición Formal de Interfaces y Gobernanza Contractual (*Spec-Driven Development*)** 
 
-A. Contrato REST: MobileNavigationAPI.yaml (OpenAPI 3.0)  
-B. Interfaz de Software Nativa: ILocationService (Abstracción de Hardware Móvil)  
-C. Interfaz de Cálculo de Ruta: IRouteNavigationEngine
-
-[Spec-Driven Development](?tab=t.xvp9bf6elzv9)
+[A. Contrato REST: MobileNavigationAPI.yaml (OpenAPI 3.0)](../spec/Spec-Driven_Devolpement.md#a-contrato-rest-mobilenavigationapiyaml-openapi-30)  
+[B. Interfaz de Software Nativa: ILocationService (Abstracción de Hardware Móvil)](../spec/Spec-Driven_Devolpement.md#b-interfaz-de-software-nativa-ilocationservice-abstracción-de-hardware-móvil)  
+[C. Interfaz de Cálculo de Ruta: IRouteNavigationEngine](../spec/Spec-Driven_Devolpement.md#c-interfaz-de-cálculo-de-ruta-iroutenavigationengine)
 
 ## **Paso 6: Vistas y ADR Registrados**
 
