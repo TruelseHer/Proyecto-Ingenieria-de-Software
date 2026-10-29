@@ -109,7 +109,7 @@ En este paso se formalizan los conceptos arquitectónicos (patrones, estilos y t
 
 * De los ADR-01 al ADR-04 corresponden a la Iteración 1
 
-[ADRS](adr/)
+[ADRS](adr/ADRS.md)
 
 * Vistas  
   * Vista 1 C\&C  
