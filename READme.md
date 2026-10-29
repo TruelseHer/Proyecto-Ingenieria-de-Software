@@ -31,21 +31,21 @@
         * [C. Interfaz de Cálculo de Ruta: IRouteNavigationEngine](spec/Spec-Driven_Devolpement.md#c-interfaz-de-cálculo-de-ruta-iroutenavigationengine)
 
 4. Vistas
-    * [Iteracion 1](iteraciones/Iteracion_1.md)
+    * Iteracion 1
         * [Vista de C&C](vistas/Iteracion%201%20Vista%201%20C&C.png)
         * [Vista de Modulos General](vistas/Iteracion%201%20Vista%202%20Modulos.png)
-    * [Iteracion 2](iteraciones/Iteracion_2.md)
+    * Iteracion 2
         * [Vista de Clases Core_Travel](vistas/Iteracion%202%20Vista%201%20Clases%20Core_travel.png)
         * [Vista de Modulos Core_travel e Ingesta](vistas/Iteracion%202%20Vista%202%20Modulos%20Core_travel%20-%20Ingestion.png)
         * [Vista de Secuencia Creacion Manual de una reserva](vistas/Iteracion%202%20Vista%203%20Secuencia.png)
-    * [Iteracion 3](iteraciones/Iteracion_3.md)
+    * Iteracion 3
         * [Vista de Deployment](vistas/Iteracion%203%20Vista%201%20Deployment.png)
         * [Vista de C&C Incluyendo bases de datos](vistas/Iteracion%203%20Vista%202%20C&C.png)
-    * [Iteracion 4](iteraciones/Iteracion_4.md)
+    * Iteracion 4
         * [Vista de C&C con Recomendador e Ingesta](vistas/Iteracion%204%20Vista%201%20C&C.png)
         * [Vista de Modulos Core_travel y Recomendador](vistas/Iteracion%204%20Vista%202%20Modulos.png)
         * [Vista de Secuencia de Ingesta ](vistas/vista3)
-    * [Iteracion 5](iteraciones/Iteracion_5.md)
+    * Iteracion 5
         * [Vista de Modulos del Cliente App Movil](vistas/Iteracion%205%20Vista%201%20Modulos.png)
         * [Vista de C&C Interaccion Movil](vistas/Iteracion%205%20Vista%202%20C&C.png)
         * [Vista de Secuencia de Navegacion e Interaccion](vistas/Iteracion%205%20Vista%203%20Secuencia.png)
