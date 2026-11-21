@@ -1,0 +1,10 @@
+<div id="toast-container" hx-swap-oob="beforeend">
+  <div class="toast-item pointer-events-auto rounded-xl border shadow-lg px-4 py-3.5 flex items-start gap-3 text-sm bg-white {{if eq .Type "error"}}border-rose-300 text-rose-950{{else if eq .Type "warning"}}border-amber-300 text-amber-950{{else if eq .Type "success"}}border-emerald-300 text-emerald-950{{else}}border-slate-200 text-slate-900{{end}}">
+    <span class="mt-1 shrink-0 h-2.5 w-2.5 rounded-full {{if eq .Type "error"}}bg-rose-600{{else if eq .Type "warning"}}bg-amber-500{{else if eq .Type "success"}}bg-emerald-600{{else}}bg-rose-600{{end}}"></span>
+    <div class="flex-1 min-w-0">
+      <p class="font-display font-bold text-xs sm:text-sm leading-snug">{{.Title}}</p>
+      <p class="text-xs text-slate-600 mt-0.5 leading-relaxed">{{.Message}}</p>
+    </div>
+    <button type="button" onclick="window.TrotamundosUI.dismissToast(this)" aria-label="Cerrar notificación" class="text-slate-400 hover:text-slate-700 text-xs font-semibold px-1.5 py-0.5 rounded hover:bg-slate-100">✕</button>
+  </div>
+</div>

@@ -1,0 +1,123 @@
+<div id="companion-route-panel" class="space-y-6">
+  {{if .Route}}
+  <!-- Top 3 Live Context Cards: Weather, Local Time & Transit Summary, Live Currency Exchange -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+    <!-- Card 1: Live Destination Weather -->
+    <div class="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-5 space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold text-rose-600">Clima actual en {{.Route.DestinationCity}}</span>
+        <span class="font-mono-code text-[11px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">{{.Route.Weather.Source}}</span>
+      </div>
+      <div class="flex items-baseline gap-3">
+        <span class="font-display text-3xl font-extrabold text-slate-900">{{printf "%.1f" .Route.Weather.TemperatureC}}°C</span>
+        <span class="text-sm font-semibold text-slate-700">{{.Route.Weather.ConditionText}}</span>
+      </div>
+      <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+        <span>Viento: <strong class="font-mono-code text-slate-800">{{printf "%.0f" .Route.Weather.WindKmh}} km/h</strong></span>
+        <span>Humedad: <strong class="font-mono-code text-slate-800">{{.Route.Weather.Humidity}}%</strong></span>
+      </div>
+    </div>
+
+    <!-- Card 2: Local Time & Distance to Hotel -->
+    <div class="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-5 space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold text-rose-600">Hora local y traslado</span>
+        <span class="font-mono-code text-[11px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">{{.Route.DestinationTimezone}}</span>
+      </div>
+      <div class="flex items-baseline justify-between">
+        <div>
+          <p class="font-mono-code text-2xl font-extrabold text-slate-900">{{.Route.LocalTimeFormatted}}</p>
+          <p class="text-xs text-slate-500 mt-0.5">Distancia: <strong class="font-mono-code text-slate-800">{{printf "%.1f" .Route.DistanceKm}} km</strong></p>
+        </div>
+        <div class="text-right text-xs space-y-0.5">
+          <p class="text-slate-600">Tren/Metro: <strong class="font-mono-code text-slate-900">{{.Route.TransitMinutes}} min</strong></p>
+          <p class="text-slate-600">Taxi/Traslado: <strong class="font-mono-code text-slate-900">{{.Route.TaxiMinutes}} min</strong></p>
+        </div>
+      </div>
+      <div class="pt-2 border-t border-slate-100 text-xs text-slate-500 truncate">
+        Alojamiento: <strong class="text-slate-800">{{.Route.HotelName}}</strong>
+      </div>
+    </div>
+
+    <!-- Card 3: Live Currency Conversion -->
+    <div class="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-5 space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold text-rose-600">Cambio de moneda en vivo</span>
+        <span class="font-mono-code text-[11px] px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 font-semibold">{{.Route.RateSource}}</span>
+      </div>
+      <div class="flex items-baseline justify-between">
+        <div>
+          <p class="text-xs text-slate-500">Tarifa estimada de traslado</p>
+          <p class="font-mono-code text-2xl font-extrabold text-slate-900">
+            {{formatMoney .Route.SampleFareTarget .Route.TargetCurrency}}
+          </p>
+        </div>
+        <div class="text-right">
+          <p class="text-xs text-slate-500">En moneda local</p>
+          <p class="font-mono-code text-sm font-bold text-slate-700">
+            {{formatMoney .Route.SampleFareLocal .Route.LocalCurrency}}
+          </p>
+        </div>
+      </div>
+      <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 font-mono-code">
+        <span>1 {{.Route.LocalCurrency}} = {{printf "%.4f" .Route.ExchangeRate}} {{.Route.TargetCurrency}}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Map + Step-by-Step Directions Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <!-- Interactive Leaflet + OpenStreetMap Map -->
+    <div class="lg:col-span-7 bg-white rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h2 class="font-display text-base font-bold text-slate-900">
+            Recorrido desde {{.Route.OriginLabel}} hacia {{.Route.HotelName}}
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">{{.Route.HotelAddress}}</p>
+        </div>
+        <span class="font-mono-code text-xs px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 font-semibold">
+          {{printf "%.1f" .Route.DistanceKm}} km · OpenStreetMap
+        </span>
+      </div>
+
+      <div id="leaflet-companion-map"
+           data-origin-lat="{{.Route.OriginLat}}"
+           data-origin-lon="{{.Route.OriginLon}}"
+           data-origin-label="{{.Route.OriginLabel}}"
+           data-hotel-lat="{{.Route.HotelLat}}"
+           data-hotel-lon="{{.Route.HotelLon}}"
+           data-hotel-name="{{.Route.HotelName}}"
+           data-polyline="{{toJSON .Route.PolylineCoords}}"
+           class="w-full h-[420px] bg-slate-100"></div>
+    </div>
+
+    <!-- Step-by-Step Navigation Instructions -->
+    <div class="lg:col-span-5 bg-white rounded-3xl border border-slate-200/90 shadow-xs p-6 space-y-5">
+      <div>
+        <span class="text-[11px] font-bold uppercase tracking-wider text-rose-600">Instrucciones paso a paso</span>
+        <h3 class="font-display text-lg font-bold text-slate-900 mt-0.5">Cómo llegar a tu alojamiento</h3>
+        <p class="text-xs text-slate-500 mt-0.5">
+          Indicaciones recomendadas para ir desde <strong>{{.Route.OriginLabel}}</strong> hasta <strong>{{.Route.HotelName}}</strong>.
+        </p>
+      </div>
+
+      <ol class="space-y-3">
+        {{range $idx, $step := .Route.Steps}}
+        <li class="flex items-start gap-3 rounded-2xl bg-[#FAF8F7] border border-slate-200/80 p-3.5">
+          <span class="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-rose-600 text-white font-mono-code text-xs font-bold">
+            •
+          </span>
+          <p class="text-xs sm:text-sm text-slate-800 leading-relaxed">{{$step}}</p>
+        </li>
+        {{end}}
+      </ol>
+
+      <div class="rounded-2xl bg-rose-50/70 border border-rose-200/80 p-4 text-xs text-rose-950 space-y-1">
+        <p class="font-bold text-rose-800">Dirección para mostrar al conductor o recepción</p>
+        <p class="font-mono-code text-slate-800">{{.Route.HotelName}} — {{.Route.HotelAddress}} ({{.Route.DestinationCity}})</p>
+      </div>
+    </div>
+  </div>
+  {{end}}
+</div>

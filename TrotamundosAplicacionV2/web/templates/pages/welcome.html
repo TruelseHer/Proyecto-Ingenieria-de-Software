@@ -1,0 +1,159 @@
+{{define "content"}}
+<div class="space-y-8">
+  <!-- Welcome Hero -->
+  <section class="relative overflow-hidden rounded-3xl bg-white border border-slate-200/90 shadow-sm">
+    <div class="grid grid-cols-1 lg:grid-cols-12">
+      <div class="lg:col-span-7 p-7 sm:p-10 flex flex-col justify-between space-y-6">
+        <div class="space-y-3">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/20 text-xs font-bold">
+            Hola, {{.CurrentUser.Name}} · Guía rápida de Trotamundos
+          </span>
+          <h1 class="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
+            Todo lo que necesitas para planificar y disfrutar tu próximo viaje
+          </h1>
+          <p class="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl">
+            En Trotamundos organizas tus vuelos, hoteles, trenes, autobuses y autos en un solo itinerario. Aquí tienes un recorrido claro por cada sección de la plataforma para empezar en segundos.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 pt-1">
+          <a href="/explore"
+             class="px-5 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-display font-bold text-sm shadow-xs transition-colors">
+            Buscar viajes disponibles
+          </a>
+          <a href="/explore/packages"
+             class="px-5 py-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-display font-bold text-sm transition-colors">
+            Ver paquetes completos
+          </a>
+          <a href="/"
+             class="px-5 py-3 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 font-semibold text-sm transition-colors">
+            Ir a Mis viajes
+          </a>
+        </div>
+      </div>
+
+      <div class="hidden lg:block lg:col-span-5 relative min-h-[300px] bg-slate-900">
+        <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=85"
+             alt="Destino costero y aguas cristalinas"
+             class="absolute inset-0 h-full w-full object-cover opacity-90">
+        <div class="absolute inset-0 bg-gradient-to-r from-white via-white/15 to-transparent"></div>
+        <div class="absolute bottom-5 right-5 bg-white/95 backdrop-blur-md rounded-2xl p-4 border border-slate-200/80 shadow-lg max-w-xs space-y-1.5">
+          <p class="text-xs font-bold text-rose-600">Tu configuración actual</p>
+          <p class="text-xs text-slate-700">
+            Moneda activa: <strong class="font-mono-code text-slate-900">{{.CurrentUser.HomeCurrency}}</strong> · Agencia: <strong class="text-slate-900">{{.PreferredAgency.Name}}</strong>
+          </p>
+          <p class="text-[11px] text-slate-500">
+            Puedes cambiar tu moneda o agencia arriba en la barra superior: toda la página se actualizará y convertirá los precios automáticamente.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feature-by-Feature Usage Guide -->
+  <section class="space-y-4">
+    <div>
+      <h2 class="font-display text-2xl font-bold text-slate-900">Cómo funciona cada sección</h2>
+      <p class="text-sm text-slate-600 mt-0.5">Selecciona cualquier módulo para comenzar o revisa qué puedes hacer en cada uno.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- 1. Search Available Trips -->
+      <article class="card-editorial rounded-3xl p-6 bg-white flex flex-col justify-between space-y-4">
+        <div class="space-y-2.5">
+          <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 font-display font-extrabold text-sm">
+            1
+          </span>
+          <h3 class="font-display text-lg font-bold text-slate-900">Buscar viajes disponibles</h3>
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Desde el menú <strong>Explorar viajes → Buscar viajes disponibles</strong> puedes filtrar vuelos, hoteles, trenes, buses y autos por destino o proveedor. Los resultados se ven inmediatamente debajo del buscador con tarifas en <strong>{{.CurrentUser.HomeCurrency}}</strong>.
+          </p>
+        </div>
+        <a href="/explore" class="inline-flex items-center text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline">
+          Abrir buscador de viajes →
+        </a>
+      </article>
+
+      <!-- 2. Complete Packages -->
+      <article class="card-editorial rounded-3xl p-6 bg-white flex flex-col justify-between space-y-4">
+        <div class="space-y-2.5">
+          <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 font-display font-extrabold text-sm">
+            2
+          </span>
+          <h3 class="font-display text-lg font-bold text-slate-900">Ver paquetes completos</h3>
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Desde <strong>Explorar viajes → Ver paquetes completos</strong> eliges circuitos internacionales con fechas de salida ya coordinadas (vuelo + hotel + traslados) y los reservas en 1 clic o los envías a tu bandeja de correo.
+          </p>
+        </div>
+        <a href="/explore/packages" class="inline-flex items-center text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline">
+          Ver paquetes con fechas →
+        </a>
+      </article>
+
+      <!-- 3. My Trips -->
+      <article class="card-editorial rounded-3xl p-6 bg-white flex flex-col justify-between space-y-4">
+        <div class="space-y-2.5">
+          <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 font-display font-extrabold text-sm">
+            3
+          </span>
+          <h3 class="font-display text-lg font-bold text-slate-900">Mis viajes e itinerario</h3>
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            En <strong>Mis viajes</strong> visualizas todos tus tramos en orden cronológico, cargas reservas manuales externas, invitas acompañantes por correo electrónico, archivas viajes pasados o solicitas soporte directo a tu agencia preferida.
+          </p>
+        </div>
+        <a href="/" class="inline-flex items-center text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline">
+          Ir a Mis viajes →
+        </a>
+      </article>
+
+      <!-- 4. Inbox & PNR -->
+      <article class="card-editorial rounded-3xl p-6 bg-white flex flex-col justify-between space-y-4">
+        <div class="space-y-2.5">
+          <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 font-display font-extrabold text-sm">
+            4
+          </span>
+          <h3 class="font-display text-lg font-bold text-slate-900">Confirmaciones y código PNR</h3>
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            En <strong>Confirmaciones y correo</strong> importas reservas externas ingresando su código localizador (PNR), administras tu lista blanca de remitentes confiables y sincronizas los comprobantes que recibes al reservar.
+          </p>
+        </div>
+        <a href="/inbox" class="inline-flex items-center text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline">
+          Abrir bandeja y PNR →
+        </a>
+      </article>
+
+      <!-- 5. Destination Companion -->
+      <article class="card-editorial rounded-3xl p-6 bg-white flex flex-col justify-between space-y-4">
+        <div class="space-y-2.5">
+          <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 font-display font-extrabold text-sm">
+            5
+          </span>
+          <h3 class="font-display text-lg font-bold text-slate-900">Guía interactiva en destino</h3>
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            Al llegar a destino, abre <strong>Guía en destino</strong> para trazar la ruta en mapa real desde el aeropuerto o estación hasta tu hotel, consultar el clima actual, ver la hora local y convertir tarifas locales a tu moneda.
+          </p>
+        </div>
+        <a href="/companion" class="inline-flex items-center text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline">
+          Explorar Guía en destino →
+        </a>
+      </article>
+
+      <!-- 6. Trends & Punctuality -->
+      <article class="card-editorial rounded-3xl p-6 bg-white flex flex-col justify-between space-y-4">
+        <div class="space-y-2.5">
+          <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 font-display font-extrabold text-sm">
+            6
+          </span>
+          <h3 class="font-display text-lg font-bold text-slate-900">Tendencias y puntualidad</h3>
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            En <strong>Tendencias</strong> consultas los destinos más reservados de la temporada y el índice histórico de puntualidad de aerolíneas y trenes antes de confirmar tus próximos tramos.
+          </p>
+        </div>
+        <a href="/trends" class="inline-flex items-center text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline">
+          Ver Tendencias →
+        </a>
+      </article>
+    </div>
+  </section>
+</div>
+{{end}}

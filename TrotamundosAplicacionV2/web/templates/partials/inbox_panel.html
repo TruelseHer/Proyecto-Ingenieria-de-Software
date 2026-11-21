@@ -1,0 +1,316 @@
+<div id="inbox-panel" class="grid grid-cols-1 lg:grid-cols-12 gap-7 items-start">
+  <!-- Left 8 Cols: PNR Importer + Email Confirmations Inbox -->
+  <div class="lg:col-span-8 space-y-6">
+    <!-- 1. Import External Reservation by PNR Code -->
+    <section class="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-6 space-y-4">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 class="font-display text-lg font-bold text-slate-900">Importar reserva externa por código (PNR)</h2>
+          <p class="text-xs text-slate-600 mt-0.5">
+            Ingresa el código de reserva de tu aerolínea, tren u hotel para recuperar los detalles del tramo y sumarlo a tu itinerario.
+          </p>
+        </div>
+        <span class="font-mono-code text-xs px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 font-semibold">
+          Conexión directa con operadores
+        </span>
+      </div>
+
+      <form hx-post="/inbox/import-pnr"
+            hx-target="#inbox-panel"
+            hx-swap="outerHTML"
+            class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div class="flex-1">
+          <label for="pnr-code-input" class="sr-only">Código PNR</label>
+          <input id="pnr-code-input"
+                 type="text"
+                 name="pnr"
+                 required
+                 placeholder="Ingresa tu código PNR (ej. ANA-8821, IB-3409, JR-9914, BKG-7741)"
+                 class="w-full rounded-xl border border-slate-300 bg-[#FAF8F7] px-4 py-3 text-sm font-mono-code uppercase text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-rose-600 focus:ring-2 focus:ring-rose-500/15">
+        </div>
+        <button type="submit"
+                class="px-5 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-display font-bold text-sm shadow-xs transition-colors shrink-0 cursor-pointer">
+          Importar reserva
+        </button>
+      </form>
+
+      {{if .SampleOffers}}
+      <div class="pt-3 border-t border-slate-100 space-y-2">
+        <p class="text-[11px] font-semibold text-slate-500">
+          Códigos emitidos disponibles en proveedores para importar con 1 clic:
+        </p>
+        <div class="flex flex-wrap items-center gap-2">
+          {{range .SampleOffers}}
+          <button type="button"
+                  onclick="window.TrotamundosUI.fillPNR('{{.SamplePNR}}')"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-rose-50 hover:border-rose-200 text-xs transition-colors cursor-pointer">
+            <span class="font-mono-code font-bold text-rose-600">{{.SamplePNR}}</span>
+            <span class="text-slate-400">·</span>
+            <span class="text-slate-700 font-medium">{{.ProviderName}} ({{.DestinationCity}})</span>
+          </button>
+          {{end}}
+        </div>
+      </div>
+      {{end}}
+    </section>
+
+    <!-- 2. Connected Mailbox & Received Confirmation Vouchers -->
+    <section class="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-6 space-y-5">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-100">
+        <div>
+          <div class="flex items-center gap-2.5">
+            <h2 class="font-display text-lg font-bold text-slate-900">Bandeja de confirmaciones recibidas</h2>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold {{if .CurrentUser.MailboxAuthorized}}bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20{{else}}bg-slate-100 text-slate-600{{end}}">
+              {{if .CurrentUser.MailboxAuthorized}}Lectura autorizada{{else}}Lectura en pausa{{end}}
+            </span>
+          </div>
+          <p class="text-xs text-slate-600 mt-1">
+            Cuenta conectada: <strong class="font-mono-code text-slate-800">{{if .CurrentUser.ConnectedEmail}}{{.CurrentUser.ConnectedEmail}}{{else}}{{.CurrentUser.Email}}{{end}}</strong>
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <form hx-post="/inbox/mailbox-auth" hx-target="#inbox-panel" hx-swap="outerHTML">
+            <input type="hidden" name="authorized" value="{{if .CurrentUser.MailboxAuthorized}}false{{else}}true{{end}}">
+            <button type="submit"
+                    class="px-3.5 py-2 rounded-xl text-xs font-semibold border transition-colors cursor-pointer {{if .CurrentUser.MailboxAuthorized}}bg-white border-slate-200 text-slate-700 hover:bg-slate-50{{else}}bg-emerald-600 border-emerald-600 text-white hover:bg-emerald-700{{end}}">
+              {{if .CurrentUser.MailboxAuthorized}}Pausar lectura de correo{{else}}Autorizar lectura de correo{{end}}
+            </button>
+          </form>
+
+          <button type="button"
+                  hx-post="/inbox/sync-all"
+                  hx-target="#inbox-panel"
+                  hx-swap="outerHTML"
+                  class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-display font-bold text-xs shadow-2xs transition-colors cursor-pointer">
+            Sincronizar mi bandeja ahora
+          </button>
+        </div>
+      </div>
+
+      <!-- List of Email Confirmations -->
+      {{if .Confirmations}}
+      <div class="space-y-3.5">
+        {{range .Confirmations}}
+        <article class="rounded-2xl border {{if eq .Status "IMPORTED"}}border-emerald-200 bg-emerald-50/25{{else if eq .Status "BLOCKED"}}border-rose-200 bg-rose-50/30{{else}}border-slate-200 bg-[#FAF8F7]{{end}} p-4 sm:p-5">
+          <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            <div class="space-y-1.5">
+              <div class="flex flex-wrap items-center gap-2">
+                {{if eq .Status "IMPORTED"}}
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+                  Importada al itinerario
+                </span>
+                {{else if eq .Status "BLOCKED"}}
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/20">
+                  Remitente bloqueado
+                </span>
+                {{else}}
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-800 ring-1 ring-inset ring-amber-600/25">
+                  Pendiente de sincronizar
+                </span>
+                {{end}}
+
+                <span class="font-mono-code text-xs font-bold px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-800">
+                  PNR {{.PNR}}
+                </span>
+                <span class="text-xs font-semibold text-slate-700">{{.ProviderName}}</span>
+                <span class="font-mono-code text-[11px] text-slate-500">&lt;{{.FromEmail}}&gt;</span>
+              </div>
+
+              <h3 class="font-display text-sm font-bold text-slate-900">{{.Subject}}</h3>
+              <p class="text-xs text-slate-600 leading-relaxed">{{.Body}}</p>
+
+              <div class="pt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
+                <span class="font-medium text-slate-800">{{.Origin}} → {{.Destination}} ({{.DestinationCity}})</span>
+                <span class="font-mono-code">{{formatDateTime .StartDate}}</span>
+                <span class="font-mono-code font-semibold text-slate-800">{{formatMoney .Price .Currency}}</span>
+                <span>Recibido: {{formatDateTime .ReceivedAt}}</span>
+              </div>
+
+              {{if .StatusReason}}
+              <p class="text-[11px] text-slate-500 italic">{{.StatusReason}}</p>
+              {{end}}
+            </div>
+
+            <div class="shrink-0 flex items-center gap-2">
+              {{if ne .Status "IMPORTED"}}
+              <button type="button"
+                      hx-post="/inbox/confirmations/{{.ID}}/import"
+                      hx-target="#inbox-panel"
+                      hx-swap="outerHTML"
+                      class="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-display font-bold text-xs shadow-2xs transition-colors cursor-pointer">
+                Sincronizar al viaje
+              </button>
+              {{else}}
+              <a href="/" class="px-3 py-1.5 rounded-xl bg-white border border-emerald-200 text-emerald-700 font-semibold text-xs hover:bg-emerald-50">
+                Ver en Mis viajes →
+              </a>
+              {{end}}
+            </div>
+          </div>
+        </article>
+        {{end}}
+      </div>
+      {{else}}
+      <div class="rounded-2xl border border-dashed border-slate-300 bg-[#FAF8F7] p-8 text-center space-y-3">
+        <div class="mx-auto h-11 w-11 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+          </svg>
+        </div>
+        <div class="max-w-md mx-auto space-y-1">
+          <h3 class="font-display text-base font-bold text-slate-900">Tu bandeja de confirmaciones está limpia</h3>
+          <p class="text-xs text-slate-500 leading-relaxed">
+            Cuando compres un vuelo o alojamiento en una página externa, importa su código PNR o pega aquí el correo de confirmación para sumarlo automáticamente a tus viajes.
+          </p>
+        </div>
+        <div class="pt-1">
+          <a href="/explore" class="inline-flex items-center px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-display font-bold text-xs shadow-2xs transition-colors">
+            Buscar viajes en el catálogo
+          </a>
+        </div>
+      </div>
+      {{end}}
+    </section>
+
+    <!-- 3. Forward / Paste External Confirmation Email -->
+    <section class="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-6 space-y-4">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 class="font-display text-lg font-bold text-slate-900">Reenviar o pegar correo de compra externa</h2>
+          <p class="text-xs text-slate-600 mt-0.5">
+            ¿Compraste un pasaje o hotel en otra página? Pega aquí el correo de confirmación recibido para que Trotamundos valide el remitente y lo sume a tu viaje.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-[11px] font-semibold text-slate-500">Cargar ejemplo:</span>
+        <button type="button" onclick="window.TrotamundosUI.fillExternalEmail('booking')" class="px-3 py-1 rounded-xl border border-slate-200 bg-slate-50 hover:bg-rose-50 hover:border-rose-200 text-xs font-medium text-slate-700 cursor-pointer">Booking.com</button>
+        <button type="button" onclick="window.TrotamundosUI.fillExternalEmail('aerolineas')" class="px-3 py-1 rounded-xl border border-slate-200 bg-slate-50 hover:bg-rose-50 hover:border-rose-200 text-xs font-medium text-slate-700 cursor-pointer">Aerolíneas Argentinas</button>
+        <button type="button" onclick="window.TrotamundosUI.fillExternalEmail('shinkansen')" class="px-3 py-1 rounded-xl border border-slate-200 bg-slate-50 hover:bg-rose-50 hover:border-rose-200 text-xs font-medium text-slate-700 cursor-pointer">JR Shinkansen</button>
+        <button type="button" onclick="window.TrotamundosUI.fillExternalEmail('untrusted')" class="px-3 py-1 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 text-xs font-medium text-amber-800 cursor-pointer">Remitente no confiable</button>
+      </div>
+
+      <form hx-post="/inbox/scan-email"
+            hx-target="#inbox-panel"
+            hx-swap="outerHTML"
+            class="space-y-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label for="ext-email-from" class="block text-[11px] font-semibold text-slate-600 mb-1">Remitente del correo</label>
+            <input id="ext-email-from"
+                   type="email"
+                   name="fromEmail"
+                   required
+                   placeholder="reservations@booking.com"
+                   class="w-full rounded-xl border border-slate-300 bg-[#FAF8F7] px-3.5 py-2.5 text-xs font-mono-code text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-rose-600">
+          </div>
+          <div>
+            <label for="ext-email-subject" class="block text-[11px] font-semibold text-slate-600 mb-1">Asunto</label>
+            <input id="ext-email-subject"
+                   type="text"
+                   name="subject"
+                   required
+                   placeholder="Confirmación de reserva"
+                   class="w-full rounded-xl border border-slate-300 bg-[#FAF8F7] px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-rose-600">
+          </div>
+        </div>
+        <div>
+          <label for="ext-email-body" class="block text-[11px] font-semibold text-slate-600 mb-1">Contenido del comprobante (incluye código PNR / confirmación)</label>
+          <textarea id="ext-email-body"
+                    name="body"
+                    rows="3"
+                    required
+                    placeholder="Ej. Tu reserva está confirmada. Código PNR: BKG-7741..."
+                    class="w-full rounded-xl border border-slate-300 bg-[#FAF8F7] px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:border-rose-600"></textarea>
+        </div>
+        <button type="submit"
+                class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-display font-bold text-xs shadow-2xs transition-colors cursor-pointer">
+          Analizar e importar correo
+        </button>
+      </form>
+    </section>
+  </div>
+
+  <!-- Right 4 Cols: Trusted Sender Domains Whitelist -->
+  <div class="lg:col-span-4 space-y-6">
+    <section class="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-6 space-y-4">
+      <div>
+        <span class="text-[11px] font-bold uppercase tracking-wider text-rose-600">Seguridad de correo</span>
+        <h2 class="font-display text-lg font-bold text-slate-900 mt-0.5">Dominios y remitentes confiables</h2>
+        <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+          Solo importamos reservas provenientes de aerolíneas, cadenas hoteleras y operadores ferroviarios incluidos en tu lista blanca.
+        </p>
+      </div>
+
+      <!-- Add New Trusted Domain Form -->
+      <form hx-post="/inbox/senders"
+            hx-target="#inbox-panel"
+            hx-swap="outerHTML"
+            class="space-y-2.5 bg-[#FAF8F7] p-3.5 rounded-2xl border border-slate-200/80">
+        <p class="text-xs font-bold text-slate-800">Autorizar nuevo dominio o correo</p>
+        <div>
+          <input type="text"
+                 name="pattern"
+                 required
+                 placeholder="Ej. @airfrance.fr o reservas@hotel.com"
+                 class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-mono-code text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-rose-600">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <input type="text"
+                 name="providerLabel"
+                 required
+                 placeholder="Nombre (Air France)"
+                 class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-rose-600">
+          <select name="category" class="w-full rounded-xl border border-slate-300 bg-white px-2.5 py-2 text-xs text-slate-800 focus:outline-none focus:border-rose-600">
+            <option value="Aerolínea">Aerolínea</option>
+            <option value="Alojamiento">Alojamiento</option>
+            <option value="Trenes">Trenes</option>
+            <option value="Alquiler de autos">Alquiler de autos</option>
+            <option value="Agencia">Agencia</option>
+          </select>
+        </div>
+        <button type="submit"
+                class="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-colors cursor-pointer">
+          + Agregar remitente confiable
+        </button>
+      </form>
+
+      <!-- Existing Sender Rules List -->
+      <div class="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+        {{range .Rules}}
+        <div class="rounded-2xl border border-slate-200/90 bg-white p-3 flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <span class="h-2 w-2 rounded-full {{if .Enabled}}bg-emerald-500{{else}}bg-slate-300{{end}}"></span>
+              <p class="text-xs font-bold text-slate-900 truncate">{{.ProviderLabel}}</p>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">{{.Category}}</span>
+            </div>
+            <p class="font-mono-code text-xs text-rose-600 mt-0.5 truncate">{{.Pattern}}</p>
+          </div>
+
+          <div class="flex items-center gap-1 shrink-0">
+            <button type="button"
+                    hx-post="/inbox/senders/{{.ID}}/toggle"
+                    hx-target="#inbox-panel"
+                    hx-swap="outerHTML"
+                    class="px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-colors cursor-pointer {{if .Enabled}}border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100{{else}}border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100{{end}}">
+              {{if .Enabled}}Pausar{{else}}Activar{{end}}
+            </button>
+            <button type="button"
+                    hx-delete="/inbox/senders/{{.ID}}"
+                    hx-target="#inbox-panel"
+                    hx-swap="outerHTML"
+                    title="Eliminar remitente"
+                    class="px-2 py-1 rounded-lg text-xs text-slate-400 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer">
+              ✕
+            </button>
+          </div>
+        </div>
+        {{end}}
+      </div>
+    </section>
+  </div>
+</div>

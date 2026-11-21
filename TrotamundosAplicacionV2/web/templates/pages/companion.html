@@ -1,0 +1,89 @@
+{{define "content"}}
+<div class="space-y-7">
+  <!-- Header & 3-Step Route Selector -->
+  <section class="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-6 sm:p-7 space-y-6">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div class="space-y-1.5">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-700 text-xs font-bold ring-1 ring-inset ring-rose-600/20">
+          Asistente en destino · Mapa interactivo en vivo
+        </span>
+        <h1 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          Guía de llegada, clima y divisas en destino
+        </h1>
+        <p class="text-sm text-slate-600 max-w-2xl">
+          Calcula la ruta real desde tu aeropuerto o estación hasta tu hotel sobre OpenStreetMap, consulta el pronóstico meteorológico actual y convierte tarifas locales a tu moneda preferida.
+        </p>
+      </div>
+    </div>
+
+    {{if .Trips}}
+    <form hx-get="/companion/route"
+          hx-target="#companion-route-panel"
+          hx-swap="outerHTML"
+          hx-trigger="change, submit"
+          class="grid grid-cols-1 md:grid-cols-12 gap-3.5 bg-[#FAF8F7] p-4 rounded-2xl border border-slate-200/90">
+      <div class="md:col-span-5">
+        <label for="comp-trip" class="block text-[11px] font-bold text-slate-500 mb-1">1. Elige tu viaje activo</label>
+        <select id="comp-trip"
+                name="tripId"
+                class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:border-rose-600 cursor-pointer">
+          {{range .Trips}}
+          <option value="{{.ID}}" {{if eq .ID $.SelectedTripID}}selected{{end}}>
+            {{.Title}} ({{.DestinationCity}}, {{.CountryCode}})
+          </option>
+          {{end}}
+        </select>
+      </div>
+
+      <div class="md:col-span-4">
+        <label for="comp-origin" class="block text-[11px] font-bold text-slate-500 mb-1">2. Punto de partida en destino</label>
+        <select id="comp-origin"
+                name="origin"
+                class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:border-rose-600 cursor-pointer">
+          <option value="airport" {{if eq .OriginMode "airport"}}selected{{end}}>Aeropuerto internacional de llegada</option>
+          <option value="station" {{if eq .OriginMode "station"}}selected{{end}}>Estación central de tren / autobús</option>
+        </select>
+      </div>
+
+      <div class="md:col-span-3">
+        <label for="comp-currency" class="block text-[11px] font-bold text-slate-500 mb-1">3. Moneda de referencia</label>
+        <select id="comp-currency"
+                name="currency"
+                class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm font-mono-code font-bold text-rose-600 focus:outline-none focus:border-rose-600 cursor-pointer">
+          <option value="USD" {{if eq .TargetCurrency "USD"}}selected{{end}}>USD — Dólar</option>
+          <option value="EUR" {{if eq .TargetCurrency "EUR"}}selected{{end}}>EUR — Euro</option>
+          <option value="ARS" {{if eq .TargetCurrency "ARS"}}selected{{end}}>ARS — Peso arg.</option>
+          <option value="JPY" {{if eq .TargetCurrency "JPY"}}selected{{end}}>JPY — Yen japonés</option>
+          <option value="BRL" {{if eq .TargetCurrency "BRL"}}selected{{end}}>BRL — Real bras.</option>
+        </select>
+      </div>
+    </form>
+    {{end}}
+  </section>
+
+  {{if .Trips}}
+    {{template "companion_route.html" .}}
+  {{else}}
+    <div class="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-12 text-center space-y-5">
+      <div class="mx-auto h-14 w-14 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center">
+        <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+          <circle cx="12" cy="10" r="3"></circle>
+        </svg>
+      </div>
+      <div class="max-w-md mx-auto space-y-2">
+        <h2 class="font-display text-xl font-bold text-slate-900">Aún no tienes viajes activos para guiar en destino</h2>
+        <p class="text-sm text-slate-600 leading-relaxed">
+          Reserva un paquete o alojamiento en nuestro catálogo para desbloquear el mapa interactivo con el recorrido hacia tu hotel, el clima actual y el conversor de moneda local.
+        </p>
+      </div>
+      <div>
+        <a href="/explore"
+           class="inline-flex items-center px-5 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-display font-bold text-sm shadow-xs transition-colors">
+          Explorar destinos disponibles
+        </a>
+      </div>
+    </div>
+  {{end}}
+</div>
+{{end}}

@@ -1,0 +1,189 @@
+<div class="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4" role="dialog" aria-modal="true">
+  <div class="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
+      <div>
+        <h3 class="font-display text-lg font-bold text-slate-900">
+          {{if .IsEdit}}Editar reserva {{.Reservation.ConfirmationCode}}{{else}}Registrar reserva manual{{end}}
+        </h3>
+        <p class="text-xs text-slate-500 mt-0.5">
+          {{if .IsEdit}}Los cambios manuales quedan protegidos frente a sincronizaciones posteriores.{{else}}Incorpora vuelos, hoteles, trenes, autobuses o alquileres de auto a tu viaje.{{end}}
+        </p>
+      </div>
+      <button type="button" onclick="window.TrotamundosUI.closeModal()" class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer">✕</button>
+    </div>
+
+    <form {{if .IsEdit}}hx-put="/reservations/{{.Reservation.ID}}"{{else}}hx-post="/trips/{{.TripID}}/reservations"{{end}}
+          hx-target="#trip-{{.TripID}}"
+          hx-swap="outerHTML"
+          class="p-6 space-y-5">
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Tipo de servicio</label>
+          <select name="type" {{if .IsEdit}}disabled{{end}} onchange="window.TrotamundosUI.switchReservationFields(this.value)" class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:outline-none focus:border-rose-600">
+            <option value="FLIGHT" {{if eq .Reservation.Type "FLIGHT"}}selected{{end}}>Vuelo</option>
+            <option value="HOTEL" {{if eq .Reservation.Type "HOTEL"}}selected{{end}}>Alojamiento / Hotel</option>
+            <option value="TRAIN" {{if eq .Reservation.Type "TRAIN"}}selected{{end}}>Tren</option>
+            <option value="BUS" {{if eq .Reservation.Type "BUS"}}selected{{end}}>Autobús</option>
+            <option value="RENTAL" {{if eq .Reservation.Type "RENTAL"}}selected{{end}}>Alquiler de auto</option>
+          </select>
+          {{if .IsEdit}}<input type="hidden" name="type" value="{{.Reservation.Type}}">{{end}}
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Estado de la reserva</label>
+          <select name="status" class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm focus:outline-none focus:border-rose-600">
+            <option value="CONFIRMED" {{if eq .Reservation.Status "CONFIRMED"}}selected{{end}}>Confirmada</option>
+            <option value="DELAYED" {{if eq .Reservation.Status "DELAYED"}}selected{{end}}>Demorada</option>
+            <option value="RESCHEDULED" {{if eq .Reservation.Status "RESCHEDULED"}}selected{{end}}>Reprogramada</option>
+            <option value="CANCELLED" {{if eq .Reservation.Status "CANCELLED"}}selected{{end}}>Cancelada</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Proveedor u operador *</label>
+          <input type="text" name="providerName" required value="{{.Reservation.ProviderName}}" placeholder="Ej. Iberia, Booking.com, JR Central" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:border-rose-600">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Código de confirmación (PNR) *</label>
+          <input type="text" name="confirmationCode" required value="{{.Reservation.ConfirmationCode}}" placeholder="Ej. IB-3409" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-mono-code uppercase focus:outline-none focus:border-rose-600">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Origen</label>
+          <input type="text" name="origin" value="{{.Reservation.Origin}}" placeholder="Ciudad, aeropuerto o estación" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:border-rose-600">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Destino o establecimiento *</label>
+          <input type="text" name="destination" required value="{{.Reservation.Destination}}" placeholder="Ciudad destino o nombre del hotel" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:border-rose-600">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Fecha y hora de inicio *</label>
+          <input type="datetime-local" name="startDate" required value="{{formatDateInput .Reservation.StartDate}}" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-mono-code focus:outline-none focus:border-rose-600">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Fecha y hora de fin</label>
+          <input type="datetime-local" name="endDate" value="{{formatDateInput .Reservation.EndDate}}" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-mono-code focus:outline-none focus:border-rose-600">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Precio</label>
+          <input type="number" step="0.01" min="0" name="price" value="{{.Reservation.Price}}" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-mono-code focus:outline-none focus:border-rose-600">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Moneda</label>
+          <select name="currency" class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm font-mono-code focus:outline-none focus:border-rose-600">
+            <option value="USD" {{if eq .Reservation.Currency "USD"}}selected{{end}}>USD</option>
+            <option value="EUR" {{if eq .Reservation.Currency "EUR"}}selected{{end}}>EUR</option>
+            <option value="ARS" {{if eq .Reservation.Currency "ARS"}}selected{{end}}>ARS</option>
+            <option value="JPY" {{if eq .Reservation.Currency "JPY"}}selected{{end}}>JPY</option>
+            <option value="BRL" {{if eq .Reservation.Currency "BRL"}}selected{{end}}>BRL</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Specific fields by transport type -->
+      <div data-res-fields="FLIGHT" class="{{if ne .Reservation.Type "FLIGHT"}}hidden{{end}} rounded-2xl bg-[#FAF8F7] border border-slate-200 p-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label class="block text-xs text-slate-600 mb-1">Número de vuelo</label>
+          <input type="text" name="flightNumber" value="{{.Reservation.Details.FlightNumber}}" placeholder="NH 105" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-mono-code">
+        </div>
+        <div>
+          <label class="block text-xs text-slate-600 mb-1">Terminal / Puerta</label>
+          <input type="text" name="terminal" value="{{.Reservation.Details.Terminal}}" placeholder="T2 / B14" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs">
+        </div>
+        <div>
+          <label class="block text-xs text-slate-600 mb-1">Asiento</label>
+          <input type="text" name="seat" value="{{.Reservation.Details.Seat}}" placeholder="14A" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-mono-code">
+        </div>
+      </div>
+
+      <div data-res-fields="HOTEL" class="{{if ne .Reservation.Type "HOTEL"}}hidden{{end}} rounded-2xl bg-[#FAF8F7] border border-slate-200 p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs text-slate-600 mb-1">Nombre del hotel</label>
+          <input type="text" name="hotelName" value="{{.Reservation.Details.HotelName}}" placeholder="Hotel Gracery Shinjuku" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs">
+        </div>
+        <div>
+          <label class="block text-xs text-slate-600 mb-1">Dirección</label>
+          <input type="text" name="address" value="{{.Reservation.Details.Address}}" placeholder="Shinjuku, Tokio" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs">
+        </div>
+        <div>
+          <label class="block text-xs text-slate-600 mb-1">Tipo de habitación</label>
+          <input type="text" name="roomType" value="{{.Reservation.Details.RoomType}}" placeholder="Doble Superior" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs">
+        </div>
+        <div>
+          <label class="block text-xs text-slate-600 mb-1">Horario de check-in</label>
+          <input type="text" name="checkInTime" value="{{.Reservation.Details.CheckInTime}}" placeholder="15:00" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-mono-code">
+        </div>
+      </div>
+
+      <div data-res-fields="TRAIN" class="{{if ne .Reservation.Type "TRAIN"}}hidden{{end}} rounded-2xl bg-[#FAF8F7] border border-slate-200 p-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label class="block text-xs text-slate-600 mb-1">Línea ferroviaria</label>
+          <input type="text" name="trainLine" value="{{.Reservation.Details.TrainLine}}" placeholder="Tokaido Shinkansen" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs">
+        </div>
+        <div>
+          <label class="block text-xs text-slate-600 mb-1">Número de tren</label>
+          <input type="text" name="trainNumber" value="{{.Reservation.Details.TrainNumber}}" placeholder="Nozomi 21" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-mono-code">
+        </div>
+        <div>
+          <label class="block text-xs text-slate-600 mb-1">Coche / Vagón</label>
+          <input type="text" name="wagon" value="{{.Reservation.Details.Wagon}}" placeholder="Coche 7" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs">
+        </div>
+      </div>
+
+      <div data-res-fields="BUS" class="{{if ne .Reservation.Type "BUS"}}hidden{{end}} rounded-2xl bg-[#FAF8F7] border border-slate-200 p-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label class="block text-xs text-slate-600 mb-1">Empresa de autobús</label>
+          <input type="text" name="busCompany" value="{{.Reservation.Details.BusCompany}}" placeholder="ALSA Supra" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs">
+        </div>
+        <div>
+          <label class="block text-xs text-slate-600 mb-1">Servicio / Línea</label>
+          <input type="text" name="lineNumber" value="{{.Reservation.Details.LineNumber}}" placeholder="EXP-402" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-mono-code">
+        </div>
+        <div>
+          <label class="block text-xs text-slate-600 mb-1">Plataforma</label>
+          <input type="text" name="platform" value="{{.Reservation.Details.Platform}}" placeholder="14" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs">
+        </div>
+      </div>
+
+      <div data-res-fields="RENTAL" class="{{if ne .Reservation.Type "RENTAL"}}hidden{{end}} rounded-2xl bg-[#FAF8F7] border border-slate-200 p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs text-slate-600 mb-1">Categoría de vehículo</label>
+          <input type="text" name="vehicleCategory" value="{{.Reservation.Details.VehicleCategory}}" placeholder="SUV Compacto" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs">
+        </div>
+        <div>
+          <label class="block text-xs text-slate-600 mb-1">Oficina de retiro</label>
+          <input type="text" name="pickupLocation" value="{{.Reservation.Details.PickupLocation}}" placeholder="Aeropuerto" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs">
+        </div>
+        <div>
+          <label class="block text-xs text-slate-600 mb-1">Oficina de entrega</label>
+          <input type="text" name="dropoffLocation" value="{{.Reservation.Details.DropoffLocation}}" placeholder="Centro ciudad" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs">
+        </div>
+        <label class="flex items-center gap-2 text-xs text-slate-700 pt-5">
+          <input type="checkbox" name="insuranceIncluded" {{if .Reservation.Details.InsuranceIncluded}}checked{{end}} class="rounded border-slate-300 text-rose-600">
+          Cobertura total incluida
+        </label>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Notas personales</label>
+        <textarea name="notes" rows="2" placeholder="Equipaje incluido, instrucciones de recepción o recordatorios..." class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:outline-none focus:border-rose-600">{{.Reservation.Notes}}</textarea>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+        <button type="button" onclick="window.TrotamundosUI.closeModal()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors cursor-pointer">
+          Cancelar
+        </button>
+        <button type="submit" class="px-5 py-2.5 rounded-xl text-xs font-display font-bold text-white bg-rose-600 hover:bg-rose-700 transition-colors shadow-xs cursor-pointer">
+          {{if .IsEdit}}Guardar cambios{{else}}Guardar en el viaje{{end}}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

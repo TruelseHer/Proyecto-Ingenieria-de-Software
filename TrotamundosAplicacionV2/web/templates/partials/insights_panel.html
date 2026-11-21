@@ -1,0 +1,104 @@
+<div id="insights-panel" class="space-y-7">
+  <!-- Global Traveler Community Summary Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-5 space-y-1.5">
+      <span class="text-xs font-semibold text-slate-500">Viajes organizados</span>
+      <p class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 font-mono-code">
+        {{.Snapshot.Summary.TotalCompletedTrips}}
+      </p>
+      <p class="text-[11px] text-emerald-700 font-medium">Itinerarios activos y completados</p>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-5 space-y-1.5">
+      <span class="text-xs font-semibold text-slate-500">Viajeros en la comunidad</span>
+      <p class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 font-mono-code">
+        {{.Snapshot.Summary.UniqueTravelersHash}}
+      </p>
+      <p class="text-[11px] text-slate-500">Estadísticas agregadas de rutas</p>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-5 space-y-1.5">
+      <span class="text-xs font-semibold text-slate-500">Reservas confirmadas</span>
+      <p class="font-display text-2xl sm:text-3xl font-extrabold text-rose-600 font-mono-code">
+        {{.Snapshot.Summary.PartnerBookings}}
+      </p>
+      <p class="text-[11px] text-slate-500">Vuelos, hoteles, trenes y autos</p>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-5 space-y-1.5">
+      <span class="text-xs font-semibold text-slate-500">Corredor más elegido</span>
+      <p class="font-display text-lg sm:text-xl font-extrabold text-slate-900 truncate">
+        {{.Snapshot.Summary.TopCorridor}}
+      </p>
+      <p class="text-[11px] text-rose-600 font-semibold">Tendencia destacada del mes</p>
+    </div>
+  </div>
+
+  <!-- Main 12-Col Grid: Top Destinations + Operator Punctuality -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-7 items-start">
+    <!-- Left 7 Cols: Most Booked Destinations of the Season -->
+    <section class="lg:col-span-7 bg-white rounded-3xl border border-slate-200/90 shadow-xs p-6 space-y-5">
+      <div class="flex items-center justify-between gap-2">
+        <div>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-rose-600">Ranking de temporada</span>
+          <h2 class="font-display text-xl font-bold text-slate-900 mt-0.5">Destinos más reservados</h2>
+        </div>
+        <a href="/explore" class="text-xs font-semibold text-rose-600 hover:underline">Ver paquetes →</a>
+      </div>
+
+      <div class="space-y-3.5">
+        {{range .Snapshot.Trends}}
+        <article class="rounded-2xl border border-slate-200/90 bg-[#FAF8F7] p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 hover:border-rose-200 transition-colors">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <h3 class="font-display text-base font-bold text-slate-900">{{.City}}</h3>
+              <span class="font-mono-code text-xs px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-600">{{.CountryCode}}</span>
+              <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+                +{{printf "%.0f" .GrowthPercent}}% esta temporada
+              </span>
+            </div>
+            <p class="text-xs text-slate-600">{{.SeasonHighlight}}</p>
+          </div>
+
+          <div class="flex sm:flex-col items-center sm:items-end justify-between gap-1 shrink-0">
+            <span class="font-mono-code text-sm font-extrabold text-slate-900">{{.TripVolume}} viajes</span>
+            <span class="text-[11px] font-medium text-rose-600">Medio favorito: {{.TopTransport}}</span>
+          </div>
+        </article>
+        {{end}}
+      </div>
+    </section>
+
+    <!-- Right 5 Cols: Airline & Rail Punctuality Index -->
+    <section class="lg:col-span-5 bg-white rounded-3xl border border-slate-200/90 shadow-xs p-6 space-y-5">
+      <div>
+        <span class="text-[11px] font-bold uppercase tracking-wider text-rose-600">Calidad de servicio</span>
+        <h2 class="font-display text-xl font-bold text-slate-900 mt-0.5">Índice de puntualidad de operadores</h2>
+        <p class="text-xs text-slate-500 mt-0.5">
+          Desempeño histórico de aerolíneas, trenes de alta velocidad y transporte terrestre para planificar escalas con tranquilidad.
+        </p>
+      </div>
+
+      <div class="space-y-3">
+        {{range .Snapshot.Disruptions}}
+        <div class="rounded-2xl border border-slate-200/90 bg-[#FAF8F7] p-4 space-y-2">
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <p class="font-display text-sm font-bold text-slate-900">{{.ProviderName}}</p>
+              <p class="text-xs text-slate-500">{{.TransportType}} · {{.TotalSegments}} tramos evaluados</p>
+            </div>
+            <span class="font-mono-code text-xs font-bold px-2.5 py-1 rounded-full {{if ge .OnTimeRate 90.0}}bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20{{else}}bg-amber-50 text-amber-800 ring-1 ring-inset ring-amber-600/25{{end}}">
+              {{printf "%.1f" .OnTimeRate}}% a tiempo
+            </span>
+          </div>
+
+          <div class="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-200/60">
+            <span>Demora promedio: <strong class="font-mono-code text-slate-800">{{.AvgDelayMinutes}} min</strong></span>
+            <span>Reprogramaciones: <strong class="font-mono-code text-slate-800">{{.DisruptedCount}}</strong></span>
+          </div>
+        </div>
+        {{end}}
+      </div>
+    </section>
+  </div>
+</div>

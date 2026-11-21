@@ -1,0 +1,117 @@
+<div id="res-{{.ID}}" class="transit-node pb-5 last:pb-0">
+  <div class="transit-node-dot {{if .IsDisrupted}}is-disrupted{{else}}is-confirmed{{end}}" title="{{.TypeLabel}}">
+    {{if eq .Type "FLIGHT"}}
+      <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+    {{else if eq .Type "HOTEL"}}
+      <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4M9 9v.01M9 12v.01M9 15v.01"/></svg>
+    {{else if eq .Type "RENTAL"}}
+      <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/><circle cx="6.5" cy="16.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg>
+    {{else if eq .Type "TRAIN"}}
+      <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="3" width="16" height="16" rx="2"/><path d="M4 11h16M12 3v8m-4 8l-2 3m10-3l2 3m-8-5h.01M15 15h.01"/></svg>
+    {{else}}
+      <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M8 6v6M15 6v6M2 12h19.6M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><circle cx="16" cy="18" r="2"/></svg>
+    {{end}}
+  </div>
+
+  <div class="rounded-2xl border {{if .IsDisrupted}}border-amber-300 bg-amber-50/40{{else}}border-slate-200/90 bg-[#FAF8F7]/70{{end}} p-4 sm:p-5">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div class="space-y-1.5">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs font-bold text-rose-600">{{.TypeLabel}}</span>
+          <span class="text-slate-300">·</span>
+          <span class="font-display font-bold text-sm text-slate-900">{{.ProviderName}}</span>
+          <span class="font-mono-code text-xs px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-800 font-semibold">
+            {{.ConfirmationCode}}
+          </span>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold {{if eq .Status "CONFIRMED"}}bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20{{else if eq .Status "CANCELLED"}}bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/20{{else}}bg-amber-50 text-amber-800 ring-1 ring-inset ring-amber-600/20{{end}}">
+            {{.StatusLabel}}
+          </span>
+          {{if .ManuallyModified}}
+          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/20" title="Editada manualmente por el viajero (protegida frente a cambios automáticos)">
+            Editada manualmente
+          </span>
+          {{end}}
+        </div>
+
+        <p class="text-sm font-semibold text-slate-900">{{.LocationSummary}}</p>
+
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600">
+          <span class="font-mono-code">{{formatDateTime .StartDate}} → {{formatDateTime .EndDate}}</span>
+          <span>Duración: <strong class="font-semibold text-slate-800">{{.DurationLabel}}</strong></span>
+          <span class="font-mono-code font-semibold text-slate-800">{{formatMoney .Price .Currency}}</span>
+          <span class="text-slate-400">({{.SourceLabel}})</span>
+        </div>
+      </div>
+
+      <!-- Edit, Assistance & Delete Buttons -->
+      <div class="flex flex-wrap items-center gap-1.5">
+        <button type="button"
+                hx-get="/partials/reservations/{{.ID}}/edit"
+                hx-target="#modal-root"
+                hx-swap="innerHTML"
+                class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer">
+          Editar
+        </button>
+
+        {{if not .SupportTicket}}
+        <button type="button"
+                hx-post="/reservations/{{.ID}}/support"
+                hx-target="#trip-{{.TripID}}"
+                hx-swap="outerHTML"
+                class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 transition-colors cursor-pointer">
+          Solicitar asistencia a agencia
+        </button>
+        {{end}}
+
+        <button type="button"
+                hx-delete="/reservations/{{.ID}}"
+                hx-target="#trip-{{.TripID}}"
+                hx-swap="outerHTML"
+                hx-confirm="¿Deseas eliminar la reserva {{.ConfirmationCode}} de este viaje?"
+                class="px-3 py-1.5 rounded-xl text-xs font-medium bg-white border border-slate-200 text-slate-500 hover:text-rose-700 hover:bg-rose-50 hover:border-rose-200 transition-colors cursor-pointer">
+          Eliminar
+        </button>
+      </div>
+    </div>
+
+    <!-- Specific Details by Reservation Type -->
+    <div class="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600">
+      {{if eq .Type "FLIGHT"}}
+        {{if .Details.FlightNumber}}<span>Vuelo: <strong class="font-mono-code text-slate-800">{{.Details.FlightNumber}}</strong></span>{{end}}
+        {{if .Details.Terminal}}<span>Terminal: <strong class="text-slate-800">{{.Details.Terminal}}</strong></span>{{end}}
+        {{if .Details.Gate}}<span>Puerta: <strong class="font-mono-code text-slate-800">{{.Details.Gate}}</strong></span>{{end}}
+        {{if .Details.Seat}}<span>Asiento: <strong class="font-mono-code text-slate-800">{{.Details.Seat}}</strong></span>{{end}}
+        {{if .Details.CabinClass}}<span>Cabina: <strong class="text-slate-800">{{.Details.CabinClass}}</strong></span>{{end}}
+      {{else if eq .Type "HOTEL"}}
+        {{if .Details.Address}}<span>Dirección: <strong class="text-slate-800">{{.Details.Address}}</strong></span>{{end}}
+        {{if .Details.RoomType}}<span>Habitación: <strong class="text-slate-800">{{.Details.RoomType}}</strong></span>{{end}}
+        {{if .Details.CheckInTime}}<span>Check-in: <strong class="font-mono-code text-slate-800">{{.Details.CheckInTime}}</strong></span>{{end}}
+      {{else if eq .Type "RENTAL"}}
+        {{if .Details.VehicleCategory}}<span>Categoría: <strong class="text-slate-800">{{.Details.VehicleCategory}}</strong></span>{{end}}
+        {{if .Details.InsuranceIncluded}}<span class="text-emerald-700 font-semibold">Cobertura total incluida</span>{{end}}
+      {{else if eq .Type "TRAIN"}}
+        {{if .Details.TrainLine}}<span>Servicio: <strong class="text-slate-800">{{.Details.TrainLine}} {{.Details.TrainNumber}}</strong></span>{{end}}
+        {{if .Details.Wagon}}<span>Ubicación: <strong class="font-mono-code text-slate-800">{{.Details.Wagon}} · Asiento {{.Details.Seat}}</strong></span>{{end}}
+      {{else if eq .Type "BUS"}}
+        {{if .Details.LineNumber}}<span>Línea: <strong class="font-mono-code text-slate-800">{{.Details.LineNumber}}</strong></span>{{end}}
+        {{if .Details.Platform}}<span>Plataforma: <strong class="font-mono-code text-slate-800">{{.Details.Platform}}</strong></span>{{end}}
+        {{if .Details.Seat}}<span>Asiento: <strong class="font-mono-code text-slate-800">{{.Details.Seat}}</strong></span>{{end}}
+      {{end}}
+    </div>
+
+    {{if .Notes}}
+    <p class="mt-2.5 text-xs text-slate-600 bg-white rounded-xl px-3 py-2 border border-slate-200/80">{{.Notes}}</p>
+    {{end}}
+
+    {{if .SupportTicket}}
+    <div class="mt-3 rounded-xl bg-rose-50/80 border border-rose-200 px-3.5 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs">
+      <div class="text-rose-950">
+        <span class="font-bold">Caso abierto con {{.SupportTicket.AgencyName}}</span>
+        <span class="font-mono-code ml-2 px-2 py-0.5 bg-white rounded-md border border-rose-200 text-rose-700 font-semibold">{{.SupportTicket.ReferenceCode}}</span>
+        <p class="text-rose-800 mt-0.5">{{.SupportTicket.IssueSummary}}</p>
+      </div>
+      <span class="px-2.5 py-1 rounded-full bg-rose-600 text-white font-semibold">En gestión ({{.SupportTicket.Status}})</span>
+    </div>
+    {{end}}
+  </div>
+</div>

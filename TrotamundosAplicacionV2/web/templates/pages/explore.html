@@ -1,0 +1,106 @@
+{{define "content"}}
+<div class="space-y-8">
+  <!-- Hero Search Banner (Search Results appear immediately below) -->
+  <section class="relative overflow-hidden rounded-3xl bg-white border border-slate-200/90 shadow-sm">
+    <div class="grid grid-cols-1 lg:grid-cols-12">
+      <div class="lg:col-span-8 p-6 sm:p-8 flex flex-col justify-between space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/20 text-xs font-semibold">
+            Buscador multimodal · Precios en {{.CurrentUser.HomeCurrency}}
+          </span>
+          <a href="/explore/packages"
+             class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors">
+            Ver paquetes completos con fechas →
+          </a>
+        </div>
+
+        <div class="space-y-2">
+          <h1 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
+            Busca vuelos, hoteles, trenes, autobuses y autos disponibles
+          </h1>
+          <p class="text-sm text-slate-600 leading-relaxed max-w-2xl">
+            Filtra por destino o medio de transporte y los resultados aparecerán aquí debajo al instante. Elige a cuál de tus viajes sumarlos o crea uno nuevo al confirmar.
+          </p>
+        </div>
+
+        <!-- Live Search & Category Filter Bar -->
+        <form id="catalog-filter-form"
+              hx-get="/partials/catalog/offers"
+              hx-target="#catalog-offers-grid"
+              hx-swap="outerHTML"
+              hx-trigger="submit, change from:select"
+              class="bg-[#FAF8F7] p-3 rounded-2xl border border-slate-200/90 shadow-2xs space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+            <div class="sm:col-span-6 relative">
+              <label for="catalog-search-q" class="block text-[11px] font-semibold text-slate-500 px-3 pt-1">Destino, ciudad o proveedor</label>
+              <input id="catalog-search-q"
+                     type="search"
+                     name="q"
+                     value="{{.Query}}"
+                     placeholder="Tokio, Madrid, Bariloche, Iberia, Shinkansen..."
+                     class="w-full bg-transparent px-3 pb-1.5 pt-0.5 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none">
+            </div>
+
+            <div class="sm:col-span-4 border-t sm:border-t-0 sm:border-l border-slate-200/80 pt-2 sm:pt-0 sm:pl-3">
+              <label for="catalog-search-type" class="block text-[11px] font-semibold text-slate-500 pt-1">Tipo de servicio</label>
+              <select id="catalog-search-type"
+                      name="type"
+                      class="w-full bg-transparent pb-1.5 pt-0.5 text-sm font-semibold text-slate-900 focus:outline-none cursor-pointer">
+                <option value="ALL" {{if or (eq .TypeFilter "") (eq .TypeFilter "ALL")}}selected{{end}}>Todos los servicios</option>
+                <option value="FLIGHT" {{if eq .TypeFilter "FLIGHT"}}selected{{end}}>Vuelos</option>
+                <option value="HOTEL" {{if eq .TypeFilter "HOTEL"}}selected{{end}}>Alojamientos y hoteles</option>
+                <option value="TRAIN" {{if eq .TypeFilter "TRAIN"}}selected{{end}}>Trenes de alta velocidad</option>
+                <option value="BUS" {{if eq .TypeFilter "BUS"}}selected{{end}}>Autobuses de larga distancia</option>
+                <option value="RENTAL" {{if eq .TypeFilter "RENTAL"}}selected{{end}}>Alquiler de autos</option>
+              </select>
+            </div>
+
+            <div class="sm:col-span-2 flex items-center justify-end">
+              <button type="submit"
+                      class="w-full sm:w-auto h-full min-h-[44px] px-5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-display font-bold text-sm flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer">
+                <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.3-4.3"></path>
+                </svg>
+                <span>Buscar</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="hidden lg:block lg:col-span-4 relative min-h-[250px] bg-slate-900">
+        <img src="https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1000&q=85"
+             alt="Templo en Kioto al atardecer"
+             class="absolute inset-0 h-full w-full object-cover opacity-90">
+        <div class="absolute inset-0 bg-gradient-to-r from-white via-white/10 to-transparent"></div>
+        <div class="absolute bottom-4 right-4 bg-white/95 backdrop-blur-md rounded-2xl p-3.5 border border-slate-200/80 shadow-lg max-w-xs">
+          <p class="text-xs font-bold text-rose-600">¿Buscas un viaje armado?</p>
+          <p class="mt-0.5 text-[11px] text-slate-600 leading-relaxed">
+            Consulta nuestros <a href="/explore/packages" class="font-semibold text-rose-600 hover:underline">Paquetes completos</a> con vuelos, hoteles y trenes listos en 1 clic.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Immediate Search Results Grid -->
+  <section class="space-y-4">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+      <div>
+        <h2 class="font-display text-xl font-bold text-slate-900">Viajes y tramos disponibles</h2>
+        <p class="text-xs text-slate-600 mt-0.5">
+          Mostrando tarifas convertidas automáticamente a <strong class="font-mono-code text-rose-600">{{.CurrentUser.HomeCurrency}}</strong>.
+        </p>
+      </div>
+      <div class="flex items-center gap-4 text-xs">
+        <a href="/inbox" class="font-semibold text-rose-600 hover:text-rose-700 hover:underline">
+          Importar código PNR →
+        </a>
+      </div>
+    </div>
+
+    {{template "catalog_offers.html" (dict "Offers" .Offers "UserTrips" .UserTrips "Query" .Query "TypeFilter" .TypeFilter)}}
+  </section>
+</div>
+{{end}}
