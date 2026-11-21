@@ -1,0 +1,74 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: trotamundos-v2-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-trotamundos}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-trotamundos_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-trotamundos_v2}
+    volumes:
+      - postgres_v2_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-trotamundos} -d ${POSTGRES_DB:-trotamundos_v2}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - trotamundos_v2_net
+
+  cache:
+    image: redis:7-alpine
+    container_name: trotamundos-v2-cache
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_v2_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - trotamundos_v2_net
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: trotamundos-v2-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+    environment:
+      PORT: "8080"
+      DATABASE_URL: postgres://${POSTGRES_USER:-trotamundos}:${POSTGRES_PASSWORD:-trotamundos_secret}@db:5432/${POSTGRES_DB:-trotamundos_v2}?sslmode=disable
+      READ_DATABASE_URL: postgres://${POSTGRES_USER:-trotamundos}:${POSTGRES_PASSWORD:-trotamundos_secret}@db:5432/${POSTGRES_DB:-trotamundos_v2}?sslmode=disable
+      REDIS_ADDR: cache:6379
+      TOKEN_SECRET: ${TOKEN_SECRET:-trotamundos-v2-prod-hmac-secret-2026}
+      ANONYMIZATION_SALT: ${ANONYMIZATION_SALT:-trotamundos-v2-analytics-salt-2026}
+      EMAIL_POLL_INTERVAL_SECONDS: "60"
+      RATE_LIMIT_RPM: "300"
+      WEB_TEMPLATES_DIR: /app/web/templates
+      WEB_STATIC_DIR: /app/web/static
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/health"]
+      interval: 10s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
+    networks:
+      - trotamundos_v2_net
+
+volumes:
+  postgres_v2_data:
+  redis_v2_data:
+
+networks:
+  trotamundos_v2_net:
+    driver: bridge
