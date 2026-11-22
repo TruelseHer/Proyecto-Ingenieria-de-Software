@@ -1,5 +1,12 @@
 # Indice General - Sistema "Trotamundos"
 
+## Ejecucion de la aplicacion
+
+* [README de la aplicación](Trotamundos%20Aplicacion/README.md)
+* Scripts principales (ejecutar dentro de `Trotamundos Aplicacion/`):
+  * [iniciar.sh](Trotamundos%20Aplicacion/iniciar.sh) (`./iniciar.sh`): Inicia PostgreSQL (`db`), Redis (`cache`) y la aplicación (`app`); soporta `--build` y `--restaurar`.
+  * [cerrar.sh](Trotamundos%20Aplicacion/cerrar.sh) (`./cerrar.sh`): Genera el respaldo SQL en `backups/trotamundos_backup.sql` y apaga los contenedores sin eliminar volúmenes.
+
 1.  Inputs:
     * [arbol de utilidad](inputs/arbol-de-utilidad.md)
     * [atributos de calidad](inputs/atributos-de-calidad.md)
