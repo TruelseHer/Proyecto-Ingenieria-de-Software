@@ -27,7 +27,7 @@ Plataforma web comercial de reservas multimodales, gestión inteligente de itine
 Para iniciar y cerrar la aplicación manteniendo todos los datos creados en PostgreSQL:
 
 ```bash
-cd TrotamundosAplicacionV2
+cd Trotamundos Aplicacion
 ./iniciar.sh              # Inicia db, cache y app (restaura respaldo si la BD está vacía)
 ./iniciar.sh --build      # Reconstruye la imagen de la aplicación e inicia
 ./iniciar.sh --restaurar  # Fuerza la restauración desde backups/trotamundos_backup.sql
