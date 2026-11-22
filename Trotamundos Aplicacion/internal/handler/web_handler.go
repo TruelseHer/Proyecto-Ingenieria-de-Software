@@ -78,9 +78,10 @@ func (h *WebHandler) Register(mux *http.ServeMux) {
 		http.Redirect(w, r, "/inbox", http.StatusSeeOther)
 	})
 	mux.HandleFunc("GET /companion", h.CompanionPage)
+	mux.HandleFunc("GET /recommendations", h.TrendsPage)
 	mux.HandleFunc("GET /trends", h.TrendsPage)
 	mux.HandleFunc("GET /insights", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/trends", http.StatusSeeOther)
+		http.Redirect(w, r, "/recommendations", http.StatusSeeOther)
 	})
 
 	// Explore & Preloaded Catalog Actions (HTMX)
@@ -105,9 +106,12 @@ func (h *WebHandler) Register(mux *http.ServeMux) {
 	mux.HandleFunc("DELETE /reservations/{id}", h.DeleteReservation)
 	mux.HandleFunc("POST /reservations/{id}/support", h.RequestSupport)
 
-	// Recommendations
+	// Recommendations (Human-in-the-Loop & Strategy Engine)
 	mux.HandleFunc("GET /partials/recommendations", h.PartialRecommendations)
 	mux.HandleFunc("POST /recommendations/strategy", h.SwitchRecommendationStrategy)
+	mux.HandleFunc("POST /recommendations/parameters", h.UpdateRecommendationParameters)
+	mux.HandleFunc("POST /recommendations/feedback", h.RecordRecommendationFeedback)
+	mux.HandleFunc("POST /recommendations/{id}/accept", h.AcceptRecommendation)
 
 	// Inbox, PNR Import & Trusted Senders
 	mux.HandleFunc("POST /inbox/import-pnr", h.ImportByPNR)
@@ -896,8 +900,122 @@ func (h *WebHandler) SwitchRecommendationStrategy(w http.ResponseWriter, r *http
 	recs = h.convertRecommendationsForCurrency(recs, currentUser.HomeCurrency)
 	h.renderer.RenderPartial(w, "recommendations.html", recs, &ToastMessage{
 		Type:    "info",
-		Title:   "Recomendaciones actualizadas",
-		Message: "Se actualizaron las experiencias sugeridas según tu preferencia.",
+		Title:   "Criterio de recomendación actualizado",
+		Message: fmt.Sprintf("Ahora estás explorando sugerencias con el modo \"%s\".", recs.ActiveStrategyLabel),
+	})
+}
+
+func (h *WebHandler) UpdateRecommendationParameters(w http.ResponseWriter, r *http.Request) {
+	_ = r.ParseForm()
+	userID := UserIDFromContext(r.Context())
+	strategyID := r.FormValue("strategy")
+	budgetLevel := r.FormValue("budgetLevel")
+	preferredTransport := r.FormValue("preferredTransport")
+	focusStyle := r.FormValue("focusStyle")
+	destinationFocus := r.FormValue("destinationFocus")
+
+	if _, err := h.recSvc.UpdateParameters(userID, strategyID, budgetLevel, preferredTransport, focusStyle, destinationFocus); err != nil {
+		h.renderer.RenderToastOnly(w, http.StatusBadRequest, ToastMessage{
+			Type:    "error",
+			Title:   "Parámetros inválidos",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	currentUser, _ := h.store.GetUser(userID)
+	recs, _ := h.recSvc.GetRecommendations(userID)
+	recs = h.convertRecommendationsForCurrency(recs, currentUser.HomeCurrency)
+	h.renderer.RenderPartial(w, "recommendations.html", recs, &ToastMessage{
+		Type:    "success",
+		Title:   "Parámetros ajustados",
+		Message: "Se recalibraron los puntajes de recomendación según tus preferencias.",
+	})
+}
+
+func (h *WebHandler) RecordRecommendationFeedback(w http.ResponseWriter, r *http.Request) {
+	_ = r.ParseForm()
+	userID := UserIDFromContext(r.Context())
+	recID := r.FormValue("recommendationId")
+	action := strings.ToUpper(strings.TrimSpace(r.FormValue("action")))
+
+	_, target, err := h.recSvc.RecordFeedback(userID, recID, action)
+	if err != nil {
+		h.renderer.RenderToastOnly(w, http.StatusBadRequest, ToastMessage{
+			Type:    "error",
+			Title:   "No se pudo procesar tu preferencia",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	currentUser, _ := h.store.GetUser(userID)
+	recs, _ := h.recSvc.GetRecommendations(userID)
+	recs = h.convertRecommendationsForCurrency(recs, currentUser.HomeCurrency)
+
+	toast := ToastMessage{
+		Type:    "info",
+		Title:   "Modelo de recomendación refinado",
+		Message: "Tus preferencias fueron actualizadas.",
+	}
+	switch action {
+	case "ACCEPT", "LIKE":
+		if target != nil {
+			toast = ToastMessage{
+				Type:    "success",
+				Title:   "Sugerencia aceptada y priorizada",
+				Message: fmt.Sprintf("Aumentamos la afinidad con %s y %s para tus próximas recomendaciones.", target.DestinationCity, target.Category),
+			}
+		}
+	case "DISMISS", "DISLIKE":
+		if target != nil {
+			toast = ToastMessage{
+				Type:    "info",
+				Title:   "Sugerencia descartada",
+				Message: fmt.Sprintf("Ocultamos \"%s\" y ajustamos los pesos de tu perfil.", target.Title),
+			}
+		}
+	case "RESET":
+		toast = ToastMessage{
+			Type:    "info",
+			Title:   "Preferencias restablecidas",
+			Message: "Se reiniciaron los filtros y pesos aprendidos de tu perfil.",
+		}
+	}
+
+	h.renderer.RenderPartial(w, "recommendations.html", recs, &toast)
+}
+
+func (h *WebHandler) AcceptRecommendation(w http.ResponseWriter, r *http.Request) {
+	_ = r.ParseForm()
+	userID := UserIDFromContext(r.Context())
+	recID := r.PathValue("id")
+	bookNow := r.FormValue("bookNow") == "true"
+
+	_, target, err := h.recSvc.RecordFeedback(userID, recID, "ACCEPT")
+	if err != nil {
+		h.renderer.RenderToastOnly(w, http.StatusBadRequest, ToastMessage{
+			Type:    "error",
+			Title:   "No se pudo aceptar la sugerencia",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	toastMsg := fmt.Sprintf("Priorizamos destinos como %s y %s en tu perfil.", target.DestinationCity, target.Category)
+	if bookNow && target != nil && target.LinkedOfferID != "" {
+		if trip, res, bErr := h.catalogSvc.BookOfferWithOptions(userID, target.LinkedOfferID, "AUTO", ""); bErr == nil && trip != nil && res != nil {
+			toastMsg = fmt.Sprintf("%s (%s) agregada a tu viaje \"%s\" y modelo de recomendación refinado.", res.ProviderName, res.ConfirmationCode, trip.Title)
+		}
+	}
+
+	currentUser, _ := h.store.GetUser(userID)
+	recs, _ := h.recSvc.GetRecommendations(userID)
+	recs = h.convertRecommendationsForCurrency(recs, currentUser.HomeCurrency)
+	h.renderer.RenderPartial(w, "recommendations.html", recs, &ToastMessage{
+		Type:    "success",
+		Title:   "¡Sugerencia incorporada!",
+		Message: toastMsg,
 	})
 }
 
@@ -1162,18 +1280,22 @@ func (h *WebHandler) CompanionRoutePartial(w http.ResponseWriter, r *http.Reques
 	}, nil)
 }
 
-// ---- Community Trends (`/trends`) ----
+// ---- Recommendations & Community Trends (`/trends`, `/recommendations`) ----
 
 type trendsViewData struct {
 	baseViewData
-	Snapshot service.InsightsSnapshot
+	Recommendations service.RecommendationResult
+	Snapshot        service.InsightsSnapshot
 }
 
 func (h *WebHandler) TrendsPage(w http.ResponseWriter, r *http.Request) {
-	base := h.buildBaseData(r, "trends", "Tendencias de Destinos")
+	base := h.buildBaseData(r, "trends", "Recomendaciones")
+	recs, _ := h.recSvc.GetRecommendations(base.CurrentUser.ID)
+	recs = h.convertRecommendationsForCurrency(recs, base.CurrentUser.HomeCurrency)
 	h.renderer.RenderPage(w, "trends.html", trendsViewData{
-		baseViewData: base,
-		Snapshot:     h.insightsSvc.Snapshot(),
+		baseViewData:    base,
+		Recommendations: recs,
+		Snapshot:        h.insightsSvc.Snapshot(),
 	})
 }
 
@@ -1352,6 +1474,7 @@ func (h *WebHandler) convertRecommendationsForCurrency(recs service.Recommendati
 		items[i] = cp
 	}
 	recs.Items = items
+	recs.ProfileSummary.HistoricalAvgPrice = h.convertAmount(recs.ProfileSummary.HistoricalAvgPrice, "USD", target)
 	return recs
 }
 

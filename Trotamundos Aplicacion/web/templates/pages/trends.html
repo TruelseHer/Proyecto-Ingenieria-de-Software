@@ -1,34 +1,59 @@
 {{define "content"}}
-<div class="space-y-7">
+<div class="space-y-8">
   <!-- Header Banner -->
   <section class="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-6 sm:p-7 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
     <div class="space-y-1.5">
       <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-700 text-xs font-bold ring-1 ring-inset ring-rose-600/20">
-        Comunidad Trotamundos · Datos en tiempo real
+        Inspiración inteligente · Aprendizaje continuo con tus preferencias
       </span>
       <h1 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-        Tendencias de destinos y puntualidad de operadores
+        Recomendaciones personalizadas para tu ruta
       </h1>
       <p class="text-sm text-slate-600 max-w-2xl">
-        Descubre cuáles son las ciudades más elegidas de la temporada, los medios de transporte preferidos en cada corredor y el índice de puntualidad de aerolíneas y trenes.
+        Analizamos tu historial de viajes y preferencias para sugerirte alternativas de alojamiento, transporte y rutas. Ajusta tus parámetros, acepta las opciones que te interesen o descártalas para refinar continuamente tus sugerencias.
       </p>
     </div>
 
     <div class="flex flex-wrap items-center gap-3">
       <button type="button"
-              hx-get="/partials/trends"
-              hx-target="#insights-panel"
+              hx-get="/partials/recommendations"
+              hx-target="#recommendations-panel"
               hx-swap="outerHTML"
               class="px-4 py-2.5 rounded-xl bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 hover:border-rose-200 font-semibold text-xs transition-colors cursor-pointer">
-        Actualizar indicadores
+        Recalcular sugerencias
       </button>
       <a href="/explore"
          class="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-display font-bold text-xs shadow-2xs transition-colors">
-        Explorar estos destinos
+        Explorar catálogo completo
       </a>
     </div>
   </section>
 
-  {{template "insights_panel.html" .}}
+  <!-- Primary Module: Proactive Recommendations & Human-in-the-Loop Controls -->
+  {{template "recommendations.html" .Recommendations}}
+
+  <!-- Secondary Section: Community Trends & Operator Punctuality (Feeds the Trending Strategy) -->
+  <section class="pt-4 border-t border-slate-200/80 space-y-5">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <span class="text-[11px] font-bold uppercase tracking-wider text-rose-600">Contexto de la comunidad</span>
+        <h2 class="font-display text-xl sm:text-2xl font-extrabold text-slate-900 mt-0.5">
+          Tendencias de destinos y puntualidad de operadores
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-600">
+          Estos indicadores globales alimentan tus recomendaciones de temporada y puntualidad.
+        </p>
+      </div>
+      <button type="button"
+              hx-get="/partials/trends"
+              hx-target="#insights-panel"
+              hx-swap="outerHTML"
+              class="self-start sm:self-auto px-4 py-2 rounded-xl bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 hover:border-rose-200 font-semibold text-xs transition-colors cursor-pointer">
+        Actualizar indicadores
+      </button>
+    </div>
+
+    {{template "insights_panel.html" .}}
+  </section>
 </div>
 {{end}}

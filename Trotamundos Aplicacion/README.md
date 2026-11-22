@@ -18,8 +18,9 @@ Plataforma web comercial de reservas multimodales, gestión inteligente de itine
 - **Guía Interactiva en Destino (`/companion`):**
   - Mapa interactivo **Leaflet + OpenStreetMap + OSRM** con recorrido real desde el aeropuerto o estación hasta el hotel del viaje.
   - Clima actual en destino (**Open-Meteo API**) y conversión de moneda en vivo (**Frankfurter API**) con caché en Redis y respaldo local automático.
-- **Tendencias de la Comunidad (`/trends`):**
-  - Ranking de destinos más elegidos de la temporada e índice de puntualidad histórico de operadores aéreos y ferroviarios.
+- **Recomendaciones Personalizadas (`/recommendations` y `/trends`):**
+  - Motor de sugerencias proactivas de alojamiento, transporte y rutas basado en el análisis del historial y preferencias del viajero (con 3 estrategias: *Afinidad de viajeros*, *Tendencias y puntualidad* y *Optimización multimodal*).
+  - Esquema de optimización interactivo (*human-in-the-loop*): ajuste de parámetros en vivo (tipo de alternativa, presupuesto, destino, prioridad) y retroalimentación por tarjeta (*Me interesa*, *Descartar*, *Incorporar a un viaje*) que refina continuamente los pesos del modelo, complementado con el ranking de destinos y puntualidad de operadores.
 
 ## Scripts de Inicio, Cierre y Respaldo de Datos
 

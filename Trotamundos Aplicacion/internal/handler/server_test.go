@@ -584,7 +584,7 @@ func TestBookOfferTripSelectionModal(t *testing.T) {
 		t.Fatalf("expected /explore/packages not to contain 'Enviar reserva a mi correo'")
 	}
 
-	// 5. Verify external email forwarding/scanning inside /inbox
+	// 5.Verify external email forwarding/scanning inside /inbox
 	scanGoodReq, _ := http.NewRequest(http.MethodPost, app.server.URL+"/inbox/scan-email", strings.NewReader(url.Values{
 		"fromEmail": {"reservations@booking.com"},
 		"subject":   {"Confirmación de hotel en Roma"},
@@ -619,5 +619,150 @@ func TestBookOfferTripSelectionModal(t *testing.T) {
 	scanBadRes.Body.Close()
 	if !strings.Contains(string(scanBadBytes), "Correo no importado") {
 		t.Fatalf("expected untrusted sender to be rejected")
+	}
+}
+
+func TestRecommendationTabAndHumanInTheLoopRefinement(t *testing.T) {
+	app := newTestApp(t)
+	client := &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+
+	regResp, err := client.PostForm(app.server.URL+"/register", url.Values{
+		"name":              {"Camila Vega"},
+		"email":             {"camila.recs@viajera.com"},
+		"password":          {"Camila2026!"},
+		"homeCurrency":      {"USD"},
+		"preferredAgencyId": {"ag-andes"},
+	})
+	if err != nil {
+		t.Fatalf("register failed: %v", err)
+	}
+	regResp.Body.Close()
+
+	var cookie *http.Cookie
+	for _, c := range regResp.Cookies() {
+		if c.Name == handler.SessionCookieName && c.Value != "" {
+			cookie = c
+			break
+		}
+	}
+	if cookie == nil {
+		t.Fatalf("missing session cookie")
+	}
+
+	u, err := app.store.GetUserByEmail("camila.recs@viajera.com")
+	if err != nil {
+		t.Fatalf("get user failed: %v", err)
+	}
+
+	// Book a Bariloche trip so history analysis detects Bariloche (AR)
+	_, err = app.tripSvc.CreateTrip(u.ID, "Patagonia Andina: Bariloche & Ruta de los 7 Lagos", "Bariloche", "AR")
+	if err != nil {
+		t.Fatalf("create trip failed: %v", err)
+	}
+
+	// 1. Verify dashboard ("/") no longer has the old embedded "#recommendations-panel" and navbar shows "Recomendaciones"
+	dashReq, _ := http.NewRequest(http.MethodGet, app.server.URL+"/", nil)
+	dashReq.AddCookie(cookie)
+	dashRes, err := client.Do(dashReq)
+	if err != nil {
+		t.Fatalf("GET / failed: %v", err)
+	}
+	dashBytes, _ := io.ReadAll(dashRes.Body)
+	dashRes.Body.Close()
+	dashBody := string(dashBytes)
+	if strings.Contains(dashBody, `id="recommendations-panel"`) {
+		t.Fatalf("expected dashboard / not to contain #recommendations-panel")
+	}
+	if !strings.Contains(dashBody, "Recomendaciones") {
+		t.Fatalf("expected navbar to contain 'Recomendaciones'")
+	}
+
+	// 2. Verify /recommendations (and /trends) renders the full recommendation system with Bariloche detected in history
+	recReq, _ := http.NewRequest(http.MethodGet, app.server.URL+"/recommendations", nil)
+	recReq.AddCookie(cookie)
+	recRes, err := client.Do(recReq)
+	if err != nil {
+		t.Fatalf("GET /recommendations failed: %v", err)
+	}
+	recBytes, _ := io.ReadAll(recRes.Body)
+	recRes.Body.Close()
+	recBody := string(recBytes)
+	if recRes.StatusCode != http.StatusOK || !strings.Contains(recBody, `id="recommendations-panel"`) {
+		t.Fatalf("expected /recommendations to render #recommendations-panel, got status=%d", recRes.StatusCode)
+	}
+	if !strings.Contains(recBody, "Complementa tu itinerario en Bariloche") {
+		t.Fatalf("expected history analysis to prioritize Bariloche recommendations")
+	}
+
+	// 3. Human-in-the-Loop parameter tuning: filter by preferredTransport=TRAIN and budgetLevel=ECONOMY
+	paramReq, _ := http.NewRequest(http.MethodPost, app.server.URL+"/recommendations/parameters", strings.NewReader(url.Values{
+		"strategy":           {"route_optimizer"},
+		"preferredTransport": {"TRAIN"},
+		"budgetLevel":        {"ECONOMY"},
+		"destinationFocus":   {"ALL"},
+		"focusStyle":         {"PUNCTUALITY"},
+	}.Encode()))
+	paramReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	paramReq.Header.Set("HX-Request", "true")
+	paramReq.AddCookie(cookie)
+	paramRes, err := client.Do(paramReq)
+	if err != nil {
+		t.Fatalf("POST /recommendations/parameters failed: %v", err)
+	}
+	paramBytes, _ := io.ReadAll(paramRes.Body)
+	paramRes.Body.Close()
+	paramBody := string(paramBytes)
+	if paramRes.StatusCode != http.StatusOK || !strings.Contains(paramBody, "Parámetros ajustados") {
+		t.Fatalf("expected parameter tuning toast, got status=%d body=%s", paramRes.StatusCode, paramBody)
+	}
+	if !strings.Contains(paramBody, "Preferencia: Trenes") {
+		t.Fatalf("expected train filter reason in recommendations after parameter update")
+	}
+
+	// 4. Human-in-the-Loop feedback: ACCEPT a recommendation and verify weights and feedback count increase
+	fbAcceptReq, _ := http.NewRequest(http.MethodPost, app.server.URL+"/recommendations/feedback", strings.NewReader(url.Values{
+		"recommendationId": {"rec-cur-hakone"},
+		"action":           {"ACCEPT"},
+	}.Encode()))
+	fbAcceptReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	fbAcceptReq.Header.Set("HX-Request", "true")
+	fbAcceptReq.AddCookie(cookie)
+	fbAcceptRes, err := client.Do(fbAcceptReq)
+	if err != nil {
+		t.Fatalf("POST /recommendations/feedback ACCEPT failed: %v", err)
+	}
+	fbAcceptBytes, _ := io.ReadAll(fbAcceptRes.Body)
+	fbAcceptRes.Body.Close()
+	fbAcceptBody := string(fbAcceptBytes)
+	if fbAcceptRes.StatusCode != http.StatusOK || !strings.Contains(fbAcceptBody, "✓ Me interesa") || strings.Contains(fbAcceptBody, "+Afinidad") {
+		t.Fatalf("expected accepted recommendation to show '✓ Me interesa' without '+Afinidad', status=%d", fbAcceptRes.StatusCode)
+	}
+
+	savedPref := app.store.GetRecommendationPreference(u.ID)
+	if savedPref.FeedbackCount != 1 || savedPref.DestinationWeights["Tokio"] <= 0 {
+		t.Fatalf("expected human-in-the-loop feedback to update weights in store, got %+v", savedPref)
+	}
+
+	// 5. Human-in-the-Loop feedback: DISMISS a recommendation and verify it is excluded from active list
+	fbDismissReq, _ := http.NewRequest(http.MethodPost, app.server.URL+"/recommendations/feedback", strings.NewReader(url.Values{
+		"recommendationId": {"rec-cur-florencia"},
+		"action":           {"DISMISS"},
+	}.Encode()))
+	fbDismissReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	fbDismissReq.Header.Set("HX-Request", "true")
+	fbDismissReq.AddCookie(cookie)
+	fbDismissRes, err := client.Do(fbDismissReq)
+	if err != nil {
+		t.Fatalf("POST /recommendations/feedback DISMISS failed: %v", err)
+	}
+	fbDismissBytes, _ := io.ReadAll(fbDismissRes.Body)
+	fbDismissRes.Body.Close()
+	fbDismissBody := string(fbDismissBytes)
+	if fbDismissRes.StatusCode != http.StatusOK || strings.Contains(fbDismissBody, "rec-cur-florencia") {
+		t.Fatalf("expected dismissed recommendation rec-cur-florencia to be removed from suggestions")
 	}
 }

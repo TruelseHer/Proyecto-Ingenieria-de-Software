@@ -227,8 +227,19 @@
 
   document.body.addEventListener("closeModal", closeModal);
 
+  var savedRecScrollY = null;
+
+  document.body.addEventListener("htmx:beforeRequest", function (evt) {
+    if (evt.detail && evt.detail.target && evt.detail.target.id === "recommendations-panel") {
+      savedRecScrollY = window.scrollY;
+    }
+  });
+
   document.body.addEventListener("htmx:beforeSwap", function (evt) {
     if (!evt.detail || !evt.detail.xhr) return;
+    if (evt.detail.target && evt.detail.target.id === "recommendations-panel") {
+      savedRecScrollY = window.scrollY;
+    }
     var status = evt.detail.xhr.status;
     if (status >= 400 && status < 500) {
       evt.detail.shouldSwap = true;
@@ -238,6 +249,20 @@
 
   document.body.addEventListener("htmx:afterSwap", function () {
     initCompanionMap();
+    if (savedRecScrollY !== null) {
+      window.scrollTo(0, savedRecScrollY);
+    }
+  });
+
+  document.body.addEventListener("htmx:afterSettle", function () {
+    if (savedRecScrollY !== null) {
+      var y = savedRecScrollY;
+      window.scrollTo(0, y);
+      requestAnimationFrame(function () {
+        window.scrollTo(0, y);
+        savedRecScrollY = null;
+      });
+    }
   });
 
   document.addEventListener("DOMContentLoaded", function () {

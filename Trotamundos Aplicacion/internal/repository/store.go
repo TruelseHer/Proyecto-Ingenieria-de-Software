@@ -27,6 +27,8 @@ type Store struct {
 	emailConfirmations map[string]domain.EmailConfirmation
 	senderRules        map[string]domain.SenderRule
 	pendingSyncs       map[string]domain.PendingSyncItem
+	recPreferences     map[string]domain.RecommendationPreference
+	recFeedback        []domain.RecommendationFeedbackEntry
 	facts              []domain.AnonymizedTripFact
 	auditLogs          []domain.AuditLogEntry
 }
@@ -41,6 +43,7 @@ func NewMemoryStore() *Store {
 		emailConfirmations: make(map[string]domain.EmailConfirmation),
 		senderRules:        make(map[string]domain.SenderRule),
 		pendingSyncs:       make(map[string]domain.PendingSyncItem),
+		recPreferences:     make(map[string]domain.RecommendationPreference),
 	}
 	SeedInitialData(s)
 	return s
@@ -92,6 +95,7 @@ func NewPostgresStore(primaryDSN, readDSN string) (*Store, error) {
 		emailConfirmations: make(map[string]domain.EmailConfirmation),
 		senderRules:        make(map[string]domain.SenderRule),
 		pendingSyncs:       make(map[string]domain.PendingSyncItem),
+		recPreferences:     make(map[string]domain.RecommendationPreference),
 	}
 
 	if err := s.migrate(ctx); err != nil {
@@ -330,6 +334,31 @@ func (s *Store) migrate(ctx context.Context) error {
 			ip_address TEXT NOT NULL,
 			created_at TIMESTAMPTZ NOT NULL
 		)`,
+		`CREATE TABLE IF NOT EXISTS recommendation_preferences (
+			user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+			strategy_id TEXT NOT NULL DEFAULT 'collaborative',
+			budget_level TEXT NOT NULL DEFAULT 'ALL',
+			preferred_transport TEXT NOT NULL DEFAULT 'ALL',
+			focus_style TEXT NOT NULL DEFAULT 'BALANCED',
+			destination_focus TEXT NOT NULL DEFAULT 'ALL',
+			accepted_ids JSONB NOT NULL DEFAULT '[]'::jsonb,
+			dismissed_ids JSONB NOT NULL DEFAULT '[]'::jsonb,
+			category_weights JSONB NOT NULL DEFAULT '{}'::jsonb,
+			destination_weights JSONB NOT NULL DEFAULT '{}'::jsonb,
+			feedback_count INTEGER NOT NULL DEFAULT 0,
+			updated_at TIMESTAMPTZ NOT NULL
+		)`,
+		`CREATE TABLE IF NOT EXISTS recommendation_feedback (
+			id TEXT PRIMARY KEY,
+			user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+			recommendation_id TEXT NOT NULL,
+			title TEXT NOT NULL DEFAULT '',
+			action TEXT NOT NULL,
+			destination_city TEXT NOT NULL DEFAULT '',
+			transport_type TEXT NOT NULL DEFAULT '',
+			created_at TIMESTAMPTZ NOT NULL
+		)`,
+		`CREATE INDEX IF NOT EXISTS idx_recommendation_feedback_user ON recommendation_feedback(user_id)`,
 	}
 	for _, stmt := range stmts {
 		if _, err := s.writeDB.ExecContext(ctx, stmt); err != nil {
@@ -1464,5 +1493,171 @@ func cloneCatalogPackage(p domain.CatalogPackage) domain.CatalogPackage {
 	cp.IncludesSummary = append([]string(nil), p.IncludesSummary...)
 	cp.AvailableDates = append([]domain.CatalogPackageDate(nil), p.AvailableDates...)
 	cp.IncludedSegments = append([]domain.CatalogSegmentTemplate(nil), p.IncludedSegments...)
+	return cp
+}
+
+// ---- Recommendation Preferences & Human-in-the-Loop Feedback ----
+
+func DefaultRecommendationPreference(userID string) domain.RecommendationPreference {
+	return domain.RecommendationPreference{
+		UserID:             userID,
+		StrategyID:         "collaborative",
+		BudgetLevel:        "ALL",
+		PreferredTransport: "ALL",
+		FocusStyle:         "BALANCED",
+		DestinationFocus:   "ALL",
+		AcceptedIDs:        []string{},
+		DismissedIDs:       []string{},
+		CategoryWeights:    map[string]int{},
+		DestinationWeights: map[string]int{},
+		FeedbackCount:      0,
+		UpdatedAt:          time.Now().UTC(),
+	}
+}
+
+func (s *Store) GetRecommendationPreference(userID string) domain.RecommendationPreference {
+	if s.readDB != nil {
+		var p domain.RecommendationPreference
+		var accRaw, disRaw, catRaw, destRaw []byte
+		err := s.readDB.QueryRow(`
+			SELECT user_id, strategy_id, budget_level, preferred_transport, focus_style, destination_focus,
+			       accepted_ids, dismissed_ids, category_weights, destination_weights, feedback_count, updated_at
+			FROM recommendation_preferences WHERE user_id=$1
+		`, userID).Scan(
+			&p.UserID, &p.StrategyID, &p.BudgetLevel, &p.PreferredTransport, &p.FocusStyle, &p.DestinationFocus,
+			&accRaw, &disRaw, &catRaw, &destRaw, &p.FeedbackCount, &p.UpdatedAt,
+		)
+		if err == nil {
+			_ = json.Unmarshal(accRaw, &p.AcceptedIDs)
+			_ = json.Unmarshal(disRaw, &p.DismissedIDs)
+			_ = json.Unmarshal(catRaw, &p.CategoryWeights)
+			_ = json.Unmarshal(destRaw, &p.DestinationWeights)
+			if p.CategoryWeights == nil {
+				p.CategoryWeights = map[string]int{}
+			}
+			if p.DestinationWeights == nil {
+				p.DestinationWeights = map[string]int{}
+			}
+			return p
+		}
+	}
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	if p, ok := s.recPreferences[userID]; ok {
+		return cloneRecPref(p)
+	}
+	return DefaultRecommendationPreference(userID)
+}
+
+func (s *Store) SaveRecommendationPreference(p domain.RecommendationPreference) error {
+	if p.CategoryWeights == nil {
+		p.CategoryWeights = map[string]int{}
+	}
+	if p.DestinationWeights == nil {
+		p.DestinationWeights = map[string]int{}
+	}
+	if p.AcceptedIDs == nil {
+		p.AcceptedIDs = []string{}
+	}
+	if p.DismissedIDs == nil {
+		p.DismissedIDs = []string{}
+	}
+	if p.UpdatedAt.IsZero() {
+		p.UpdatedAt = time.Now().UTC()
+	}
+	if s.writeDB != nil {
+		accJSON, _ := json.Marshal(p.AcceptedIDs)
+		disJSON, _ := json.Marshal(p.DismissedIDs)
+		catJSON, _ := json.Marshal(p.CategoryWeights)
+		destJSON, _ := json.Marshal(p.DestinationWeights)
+		_, err := s.writeDB.Exec(`
+			INSERT INTO recommendation_preferences (
+				user_id, strategy_id, budget_level, preferred_transport, focus_style, destination_focus,
+				accepted_ids, dismissed_ids, category_weights, destination_weights, feedback_count, updated_at
+			) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+			ON CONFLICT (user_id) DO UPDATE SET
+				strategy_id=EXCLUDED.strategy_id,
+				budget_level=EXCLUDED.budget_level,
+				preferred_transport=EXCLUDED.preferred_transport,
+				focus_style=EXCLUDED.focus_style,
+				destination_focus=EXCLUDED.destination_focus,
+				accepted_ids=EXCLUDED.accepted_ids,
+				dismissed_ids=EXCLUDED.dismissed_ids,
+				category_weights=EXCLUDED.category_weights,
+				destination_weights=EXCLUDED.destination_weights,
+				feedback_count=EXCLUDED.feedback_count,
+				updated_at=EXCLUDED.updated_at
+		`, p.UserID, p.StrategyID, p.BudgetLevel, p.PreferredTransport, p.FocusStyle, p.DestinationFocus,
+			accJSON, disJSON, catJSON, destJSON, p.FeedbackCount, p.UpdatedAt)
+		return err
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.recPreferences[p.UserID] = cloneRecPref(p)
+	return nil
+}
+
+func (s *Store) AppendRecommendationFeedback(entry domain.RecommendationFeedbackEntry) error {
+	if s.writeDB != nil {
+		_, err := s.writeDB.Exec(`
+			INSERT INTO recommendation_feedback (id, user_id, recommendation_id, title, action, destination_city, transport_type, created_at)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+			ON CONFLICT (id) DO NOTHING
+		`, entry.ID, entry.UserID, entry.RecommendationID, entry.Title, entry.Action, entry.DestinationCity, entry.TransportType, entry.CreatedAt)
+		return err
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.recFeedback = append([]domain.RecommendationFeedbackEntry{entry}, s.recFeedback...)
+	return nil
+}
+
+func (s *Store) ListRecommendationFeedback(userID string, limit int) []domain.RecommendationFeedbackEntry {
+	if limit <= 0 {
+		limit = 20
+	}
+	if s.readDB != nil {
+		rows, err := s.readDB.Query(`
+			SELECT id, user_id, recommendation_id, title, action, destination_city, transport_type, created_at
+			FROM recommendation_feedback WHERE user_id=$1 ORDER BY created_at DESC LIMIT $2
+		`, userID, limit)
+		if err == nil {
+			defer rows.Close()
+			var list []domain.RecommendationFeedbackEntry
+			for rows.Next() {
+				var e domain.RecommendationFeedbackEntry
+				if err := rows.Scan(&e.ID, &e.UserID, &e.RecommendationID, &e.Title, &e.Action, &e.DestinationCity, &e.TransportType, &e.CreatedAt); err == nil {
+					list = append(list, e)
+				}
+			}
+			return list
+		}
+	}
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	var list []domain.RecommendationFeedbackEntry
+	for _, e := range s.recFeedback {
+		if e.UserID == userID {
+			list = append(list, e)
+			if len(list) >= limit {
+				break
+			}
+		}
+	}
+	return list
+}
+
+func cloneRecPref(p domain.RecommendationPreference) domain.RecommendationPreference {
+	cp := p
+	cp.AcceptedIDs = append([]string(nil), p.AcceptedIDs...)
+	cp.DismissedIDs = append([]string(nil), p.DismissedIDs...)
+	cp.CategoryWeights = make(map[string]int, len(p.CategoryWeights))
+	for k, v := range p.CategoryWeights {
+		cp.CategoryWeights[k] = v
+	}
+	cp.DestinationWeights = make(map[string]int, len(p.DestinationWeights))
+	for k, v := range p.DestinationWeights {
+		cp.DestinationWeights[k] = v
+	}
 	return cp
 }

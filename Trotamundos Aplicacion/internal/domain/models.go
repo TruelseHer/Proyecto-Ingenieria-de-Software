@@ -791,17 +791,65 @@ type PendingSyncItem struct {
 }
 
 type Recommendation struct {
-	ID             string  `json:"id"`
-	Strategy       string  `json:"strategy"`
-	Title          string  `json:"title"`
-	Destination    string  `json:"destination"`
-	Category       string  `json:"category"`
-	Description    string  `json:"description"`
-	EstimatedPrice float64 `json:"estimatedPrice"`
-	Currency       string  `json:"currency"`
-	Score          int     `json:"score"`
-	HighlightTag   string  `json:"highlightTag"`
-	ImageURL       string  `json:"imageUrl"`
+	ID              string          `json:"id"`
+	Strategy        string          `json:"strategy"`
+	Title           string          `json:"title"`
+	Destination     string          `json:"destination"`
+	DestinationCity string          `json:"destinationCity"`
+	CountryCode     string          `json:"countryCode"`
+	Category        string          `json:"category"`
+	TransportType   ReservationType `json:"transportType"`
+	Description     string          `json:"description"`
+	MatchReason     string          `json:"matchReason"`
+	EstimatedPrice  float64         `json:"estimatedPrice"`
+	Currency        string          `json:"currency"`
+	Score           int             `json:"score"`
+	HighlightTag    string          `json:"highlightTag"`
+	ImageURL        string          `json:"imageUrl"`
+	LinkedOfferID   string          `json:"linkedOfferId,omitempty"`
+	LinkedPackageID string          `json:"linkedPackageId,omitempty"`
+	FeedbackStatus  string          `json:"feedbackStatus,omitempty"` // "", "ACCEPTED", "DISMISSED", "SAVED"
+}
+
+type RecommendationPreference struct {
+	UserID             string            `json:"userId"`
+	StrategyID         string            `json:"strategyId"`
+	BudgetLevel        string            `json:"budgetLevel"`        // ALL, ECONOMY, COMFORT, PREMIUM
+	PreferredTransport string            `json:"preferredTransport"` // ALL, FLIGHT, HOTEL, TRAIN, BUS, RENTAL
+	FocusStyle         string            `json:"focusStyle"`         // BALANCED, ROUTE_CONTINUITY, PUNCTUALITY, VALUE
+	DestinationFocus   string            `json:"destinationFocus"`   // ALL or specific city
+	AcceptedIDs        []string          `json:"acceptedIds"`
+	DismissedIDs       []string          `json:"dismissedIds"`
+	CategoryWeights    map[string]int    `json:"categoryWeights"`
+	DestinationWeights map[string]int    `json:"destinationWeights"`
+	FeedbackCount      int               `json:"feedbackCount"`
+	UpdatedAt          time.Time         `json:"updatedAt"`
+}
+
+type RecommendationFeedbackEntry struct {
+	ID               string    `json:"id"`
+	UserID           string    `json:"userId"`
+	RecommendationID string    `json:"recommendationId"`
+	Title            string    `json:"title"`
+	Action           string    `json:"action"` // ACCEPT, DISMISS, SAVE, RESET
+	DestinationCity  string    `json:"destinationCity"`
+	TransportType    string    `json:"transportType"`
+	CreatedAt        time.Time `json:"createdAt"`
+}
+
+type UserTripContext struct {
+	User              User                     `json:"user"`
+	Trips             []*Trip                  `json:"trips"`
+	Trends            []DestinationTrend       `json:"trends"`
+	Disruptions       []ProviderDisruption     `json:"disruptions"`
+	CatalogOffers     []CatalogOffer           `json:"catalogOffers"`
+	CatalogPackages   []CatalogPackage         `json:"catalogPackages"`
+	Preferences       RecommendationPreference `json:"preferences"`
+	BookedCities      map[string]bool          `json:"bookedCities"`
+	BookedCountries   map[string]bool          `json:"bookedCountries"`
+	BookedOfferPNRs   map[string]bool          `json:"bookedOfferPnrs"`
+	HistoricalAvgCost float64                  `json:"historicalAvgCost"`
+	TopUserTransport  ReservationType          `json:"topUserTransport"`
 }
 
 type AnonymizedTripFact struct {

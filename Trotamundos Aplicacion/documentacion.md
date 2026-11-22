@@ -208,11 +208,16 @@ El módulo `/inbox` combina cuatro flujos complementarios:
 * **Divisas y hora local:** Consulta **Frankfurter API (BCE)** con tabla de respaldo para 12 monedas (`USD`, `EUR`, `GBP`, `JPY`, `ARS`, `BRL`, `PEN`, `CHF`, `CLP`, `MXN`, `COP`, `UYU`) y calcula hora local según huso horario del destino.
 * **Endpoint móvil consolidado:** `GET /mobile/v1/trips/{tripId}/navigation-context` entrega ubicación del hotel, clima, contexto de divisa, polilínea y un `mapRoutingToken` firmado por 15 minutos en una sola petición JSON.
 
-#### F. Motor de Recomendaciones (`recommendation_service.go`)
-* Implementa el patrón **Strategy** mediante la interfaz `RecommendationStrategy`:
-  * **`collaborative` (*Afinidad de viajeros*):** Estrategia por defecto. Inspecciona destinos ya presentes en los viajes del usuario (p. ej. `JP`/`Tokio` o `ES`/`Madrid`) para sugerir complementos afines; si el usuario no tiene viajes coincidentes, devuelve sugerencias destacadas generales.
-  * **`trending` (*Tendencias de temporada*):** Combina recomendaciones de alta demanda con el destino líder proveniente de `InsightsService.DestinationTrends()`.
-* Los resultados se cachean por usuario y estrategia en Redis/memoria bajo la clave `user:<userID>:recs:<strategyID>` por 30 segundos y permiten registrar nuevas estrategias dinámicamente vía `RegisterStrategy()`.
+#### F. Motor de Recomendaciones y Optimización *Human-in-the-Loop* (`/recommendations`, `/trends`, `recommendation_service.go`)
+* **Pestaña dedicada `Recomendaciones`:** El sistema de recomendación se encuentra en la pestaña principal **Recomendaciones** (`/recommendations` y `/trends`), separada de la vista operativa de *Mis viajes* (`/`).
+* Implementa el patrón **Strategy** mediante la interfaz `RecommendationStrategy` (`GenerateRecommendations(ctx UserTripContext)` y `GetStrategyIdentifier()`):
+  * **`collaborative` (*Afinidad de viajeros*):** Estrategia por defecto. Analiza el historial completo de viajes del usuario (`BookedCities`, `BookedCountries`, `TopUserTransport`, `HistoricalAvgCost`) en todos los destinos del catálogo (*Tokio*, *Madrid*, *Bariloche*, *Roma*, *Cusco*, *París*) para sugerir proactivamente alternativas de alojamiento, transporte o rutas complementarias.
+  * **`trending` (*Tendencias y puntualidad*):** Combina recomendaciones de alta demanda con el crecimiento estacional y puntualidad verificada provenientes de `InsightsService.DestinationTrends()`.
+  * **`route_optimizer` (*Optimización multimodal*):** Prioriza alternativas de transporte terrestre/ferroviario, conexiones centro a centro y alojamientos cercanos a nodos de tránsito optimizando relación costo-tiempo.
+* **Esquema de optimización *Human-in-the-Loop*:**
+  * **Ajuste interactivo de parámetros (`POST /recommendations/parameters`):** El viajero puede ajustar en tiempo real el tipo de alternativa (`ALL`, `HOTEL`, `TRAIN`, `FLIGHT`, `RENTAL`, `BUS`), nivel de presupuesto (`ALL`, `ECONOMY`, `COMFORT`, `PREMIUM`), destino objetivo y prioridad de optimización (`BALANCED`, `ROUTE_CONTINUITY`, `PUNCTUALITY`, `VALUE`).
+  * **Retroalimentación continua (`POST /recommendations/feedback` y `POST /recommendations/{id}/accept`):** El usuario interactúa directamente con cada sugerencia: al seleccionar *"Me interesa"*, la interfaz conserva la posición actual de visualización en pantalla, muestra el indicador `✓ Me interesa` sobre la propia tarjeta e incrementa los pesos aprendidos (`DestinationWeights` y `CategoryWeights`) del modelo para priorizar alternativas afines; también permite incorporarla directamente a un viaje activo o nuevo, o descartarla (*"Descartar"*) para excluirla y recalibrar los pesos. Las preferencias e interacciones se persisten en PostgreSQL (`recommendation_preferences` y `recommendation_feedback`).
+* Los resultados se cachean por usuario, estrategia y vector de parámetros en Redis/memoria bajo el prefijo `user:<userID>:recs:...` por 30 segundos y se invalidan automáticamente ante cada ajuste o feedback del usuario.
 
 #### G. Tendencias y Analítica (`/trends`, `insights_service.go`, `broker.go`)
 * `TripService` publica eventos de dominio (`TRIP_CREATED`, `TRIP_MODIFIED`, `TRIP_ARCHIVED`, `RESERVATION_ADDED`) en el tópico `trip.lifecycle` del `EventBroker` (4 particiones por hash FNV-1a sobre el `tripID`, cola de 256 elementos).
@@ -223,7 +228,7 @@ El módulo `/inbox` combina cuatro flujos complementarios:
 
 ## 5. Modelo de Datos (PostgreSQL)
 
-`Store.migrate()` (`internal/repository/store.go`) crea e indexa **12 tablas** en PostgreSQL:
+`Store.migrate()` (`internal/repository/store.go`) crea e indexa **14 tablas** en PostgreSQL:
 
 | Tabla | Descripción | Campos Clave / Relaciones |
 | :--- | :--- | :--- |
@@ -239,6 +244,8 @@ El módulo `/inbox` combina cuatro flujos complementarios:
 | `pending_syncs` | Cola de sincronizaciones pendientes | `id` (PK), `user_id`, `provider_name`, `error_reason`, `attempts`, `status`, `next_retry_at` |
 | `analytics_facts` | Hechos analíticos anonimizados (sin PII) | `id` (PK), `pseudonym_id` (`anon_...`), `event_type`, `destination_city`, `transport_types` (JSONB), `disrupted` |
 | `audit_logs` | Trazabilidad inmutable de seguridad | `id` (PK), `actor_user_id`, `action`, `resource_type`, `resource_id`, `outcome` (`ALLOWED`/`DENIED`), `ip_address` |
+| `recommendation_preferences` | Preferencias, parámetros y pesos aprendidos por usuario | `user_id` (PK FK `users` CASCADE), `strategy_id`, `budget_level`, `preferred_transport`, `focus_style`, `destination_focus`, `accepted_ids` (JSONB), `dismissed_ids` (JSONB), `category_weights` (JSONB), `destination_weights` (JSONB) |
+| `recommendation_feedback` | Historial de interacciones *human-in-the-loop* | `id` (PK), `user_id` (FK `users` CASCADE), `recommendation_id`, `action` (`ACCEPT`/`DISMISS`/`RESET`), `destination_city`, `transport_type` |
 
 ### Datos Sembrados por Defecto (`seed.go`)
 Solo se cargan si `catalog_packages` está vacío:
@@ -263,12 +270,12 @@ Todas las rutas requieren sesión válida mediante `SessionMiddleware`, excepto 
 | `POST /logout` | Cierre de sesión y revocación del token | Redirect `/login` |
 | `POST /profile/preferences` | Actualiza agencia preferida y moneda base | Header `HX-Refresh: true` |
 | `GET /welcome` | Guía rápida de uso y configuración activa | Página `welcome.html` |
-| `GET /`, `GET /trips` | Panel principal *Mis viajes* y recomendaciones | Página `dashboard.html` |
+| `GET /`, `GET /trips` | Panel principal *Mis viajes* | Página `dashboard.html` |
 | `GET /explore` | Buscador de tramos individuales disponibles | Página `explore.html` |
 | `GET /explore/packages` | Catálogo de 6 paquetes completos con fechas | Página `explore_packages.html` |
 | `GET /inbox` (y redirect desde `/sync`) | Importación PNR, escaneo de correo, bandeja y lista blanca | Página `inbox.html` |
 | `GET /companion` | Guía en destino (mapa Leaflet + clima + divisa) | Página `companion.html` |
-| `GET /trends` (y redirect desde `/insights`) | Ranking de destinos y puntualidad | Página `trends.html` |
+| `GET /recommendations`, `GET /trends` (y redirect desde `/insights`) | Motor de recomendaciones personalizado y ranking de tendencias/puntualidad | Página `trends.html` |
 | `GET /partials/catalog/offers` | Filtra ofertas del buscador en vivo | Parcial `catalog_offers.html` |
 | `GET /partials/catalog/offers/{id}/book-modal` | Modal para elegir viaje destino o crear uno nuevo | Parcial `book_offer_modal.html` |
 | `POST /catalog/packages/{id}/book` | Reserva paquete completo y envía vouchers | Parcial `toast.html` |
@@ -282,7 +289,9 @@ Todas las rutas requieren sesión válida mediante `SessionMiddleware`, excepto 
 | `GET /partials/reservations/new`, `/{id}/edit` | Abre modal de alta o edición manual de reserva | Parcial `reservation_modal.html` |
 | `POST /trips/{id}/reservations`, `PUT /reservations/{id}`, `DELETE /reservations/{id}` | Crea, edita (protegido) o elimina una reserva | Parcial `trip_list.html` / `trip_card.html` + toast |
 | `POST /reservations/{id}/support` | Abre ticket de soporte con agencia preferida | Parcial `reservation_item.html` + toast |
-| `GET /partials/recommendations`, `POST /recommendations/strategy` | Muestra o cambia estrategia de recomendación | Parcial `recommendations.html` |
+| `GET /partials/recommendations`, `POST /recommendations/strategy` | Muestra o cambia estrategia de recomendación (manteniendo posición de scroll) | Parcial `recommendations.html` |
+| `POST /recommendations/parameters` | Ajusta parámetros de tipo de alternativa, presupuesto, destino y prioridad | Parcial `recommendations.html` + toast |
+| `POST /recommendations/feedback`, `POST /recommendations/{id}/accept` | Registra interacción *Me interesa* / *Descartar* / *Restablecer* preservando la vista actual | Parcial `recommendations.html` + toast |
 | `POST /inbox/import-pnr` | Importa reserva buscando código PNR | Parcial `inbox_panel.html` + toast |
 | `POST /inbox/scan-email` | Parsea correo pegado aplicando lista blanca | Parcial `inbox_panel.html` + toast |
 | `POST /inbox/mailbox-auth` | Activa/revoca permiso de lectura de bandeja | Parcial `inbox_panel.html` + toast |
@@ -305,6 +314,9 @@ Todas las rutas requieren sesión válida mediante `SessionMiddleware`, excepto 
 | `GET /api/v1/analytics/trends/destinations` | Tendencias de destinos anonimizadas |
 | `GET /api/v1/analytics/metrics/disruptions` | Estadísticas de puntualidad y demoras por operador |
 | `GET /api/v1/analytics/monetization/summary` | Resumen agregado de viajes completados, viajeros seudonimizados y volumen |
+| `GET /api/v1/recommendations` | Obtiene recomendaciones personalizadas, preferencias y resumen de perfil |
+| `POST /api/v1/recommendations/parameters` | Actualiza parámetros de recomendación y recalcula sugerencias |
+| `POST /api/v1/recommendations/feedback` | Registra feedback *human-in-the-loop* (`ACCEPT`, `DISMISS`, `RESET`) |
 
 ---
 
@@ -363,10 +375,11 @@ cd TrotamundosAplicacionV2
 go test -count=1 -v ./...
 ```
 
-La suite ejecuta tres baterías de pruebas de integración HTTP sobre servidor `httptest`:
+La suite ejecuta cuatro baterías de pruebas de integración HTTP sobre servidor `httptest`:
 1. **`TestEndToEndRealUserExperience`:** Redirección a `/login`, registro en `/register`, estado limpio inicial (`0` viajes y `0` correos), validación de contraseña, reserva de paquete completo con entrega en bandeja, envío y sincronización de oferta individual, importación PNR, protección de edición manual, denegación/permiso al compartir por correo, ruta/clima/divisa en `/companion`, verificación de ausencia de términos internos del ADD en todas las páginas y redirección de login a `/welcome`.
-2. **`TestHTMXEndpointsAndPartialsRenderCleanly`:** Verifica renderizado limpio de parciales HTMX (`GET /partials/trips`, creación manual de viaje y reserva, cambio de estrategia en `/recommendations/strategy`, recálculo en `/companion/route`, métricas en `/partials/trends`, cambio de moneda/agencia con `HX-Refresh: true` y escaneo de correo externo permitido y bloqueado).
+2. **`TestHTMXEndpointsAndPartialsRenderCleanly`:** Verifica renderizado limpio de parciales HTMX (`GET /partials/trips`, creación manual de viaje y reserva, recálculo en `/companion/route`, métricas en `/partials/trends`, cambio de moneda/agencia con `HX-Refresh: true` y escaneo de correo externo permitido y bloqueado).
 3. **`TestBookOfferTripSelectionModal`:** Verifica el modal de selección de viaje destino (`/partials/catalog/offers/{id}/book-modal`), asignación exacta a un viaje específico sin mezclar destinos y creación de viaje nuevo (`targetTripId=NEW`).
+4. **`TestRecommendationTabAndHumanInTheLoopRefinement`:** Verifica que la pestaña **Recomendaciones** (`/recommendations`) se encuentre separada de `/`, analice el historial de viajes del usuario, permita ajustar parámetros (`POST /recommendations/parameters`), marque la sugerencia aceptada con `✓ Me interesa` actualizando los pesos aprendidos (`POST /recommendations/feedback`) y excluya las descartadas.
 
 ---
 

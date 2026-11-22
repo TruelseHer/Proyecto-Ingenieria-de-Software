@@ -72,6 +72,11 @@ func (a *APIHandler) Register(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/v1/analytics/trends/destinations", a.AnalyticsDestinationTrends)
 	mux.HandleFunc("GET /api/v1/analytics/metrics/disruptions", a.AnalyticsDisruptions)
 	mux.HandleFunc("GET /api/v1/analytics/monetization/summary", a.AnalyticsMonetizationSummary)
+
+	// Recommendations & Human-in-the-Loop Optimization API
+	mux.HandleFunc("GET /api/v1/recommendations", a.GetRecommendations)
+	mux.HandleFunc("POST /api/v1/recommendations/parameters", a.UpdateRecommendationParameters)
+	mux.HandleFunc("POST /api/v1/recommendations/feedback", a.RecordRecommendationFeedback)
 }
 
 func (a *APIHandler) Health(w http.ResponseWriter, _ *http.Request) {
@@ -329,6 +334,71 @@ func (a *APIHandler) AnalyticsDisruptions(w http.ResponseWriter, _ *http.Request
 
 func (a *APIHandler) AnalyticsMonetizationSummary(w http.ResponseWriter, _ *http.Request) {
 	writeJSON(w, http.StatusOK, a.insightsSvc.Summary())
+}
+
+func (a *APIHandler) GetRecommendations(w http.ResponseWriter, r *http.Request) {
+	userID := UserIDFromContext(r.Context())
+	res, err := a.recSvc.GetRecommendations(userID)
+	if err != nil {
+		writeJSONError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"activeStrategy": res.ActiveStrategy,
+		"preferences":    res.Preferences,
+		"profileSummary": res.ProfileSummary,
+		"items":          res.Items,
+		"cacheHit":       res.CacheHit,
+		"latencyMs":      res.LatencyMs,
+	})
+}
+
+func (a *APIHandler) UpdateRecommendationParameters(w http.ResponseWriter, r *http.Request) {
+	userID := UserIDFromContext(r.Context())
+	var in struct {
+		StrategyID         string `json:"strategyId"`
+		BudgetLevel        string `json:"budgetLevel"`
+		PreferredTransport string `json:"preferredTransport"`
+		FocusStyle         string `json:"focusStyle"`
+		DestinationFocus   string `json:"destinationFocus"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
+		writeJSONError(w, http.StatusBadRequest, "JSON inválido")
+		return
+	}
+	pref, err := a.recSvc.UpdateParameters(userID, in.StrategyID, in.BudgetLevel, in.PreferredTransport, in.FocusStyle, in.DestinationFocus)
+	if err != nil {
+		writeJSONError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	res, _ := a.recSvc.GetRecommendations(userID)
+	writeJSON(w, http.StatusOK, map[string]any{
+		"preferences": pref,
+		"items":       res.Items,
+	})
+}
+
+func (a *APIHandler) RecordRecommendationFeedback(w http.ResponseWriter, r *http.Request) {
+	userID := UserIDFromContext(r.Context())
+	var in struct {
+		RecommendationID string `json:"recommendationId"`
+		Action           string `json:"action"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
+		writeJSONError(w, http.StatusBadRequest, "JSON inválido")
+		return
+	}
+	pref, target, err := a.recSvc.RecordFeedback(userID, in.RecommendationID, in.Action)
+	if err != nil {
+		writeJSONError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	res, _ := a.recSvc.GetRecommendations(userID)
+	writeJSON(w, http.StatusOK, map[string]any{
+		"preferences": pref,
+		"target":      target,
+		"items":       res.Items,
+	})
 }
 
 func writeJSON(w http.ResponseWriter, status int, payload any) {

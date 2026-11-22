@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict ugLdUeSmgfXwZbCGEdl2i6wyo8qmgo7Ya1muWzhkraU6etAktc4bPIaxkZbPWyO
+\restrict fJfsudWE00t9fIlqZuBhoBWHTgdY4zxm7DrfxfmMBXBVn4kd8eOpW62oTuUZASj
 
 -- Dumped from database version 16.16
 -- Dumped by pg_dump version 16.16
@@ -22,10 +22,13 @@ ALTER TABLE IF EXISTS ONLY public.trips DROP CONSTRAINT IF EXISTS trips_owner_id
 ALTER TABLE IF EXISTS ONLY public.support_tickets DROP CONSTRAINT IF EXISTS support_tickets_reservation_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.sender_rules DROP CONSTRAINT IF EXISTS sender_rules_user_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.reservations DROP CONSTRAINT IF EXISTS reservations_trip_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.recommendation_preferences DROP CONSTRAINT IF EXISTS recommendation_preferences_user_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.recommendation_feedback DROP CONSTRAINT IF EXISTS recommendation_feedback_user_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.email_confirmations DROP CONSTRAINT IF EXISTS email_confirmations_user_id_fkey;
 DROP INDEX IF EXISTS public.idx_trips_owner;
 DROP INDEX IF EXISTS public.idx_sender_rules_user;
 DROP INDEX IF EXISTS public.idx_reservations_trip;
+DROP INDEX IF EXISTS public.idx_recommendation_feedback_user;
 DROP INDEX IF EXISTS public.idx_email_confirmations_user;
 DROP INDEX IF EXISTS public.idx_catalog_offers_type;
 DROP INDEX IF EXISTS public.idx_catalog_offers_pnr;
@@ -37,6 +40,8 @@ ALTER TABLE IF EXISTS ONLY public.support_tickets DROP CONSTRAINT IF EXISTS supp
 ALTER TABLE IF EXISTS ONLY public.support_tickets DROP CONSTRAINT IF EXISTS support_tickets_pkey;
 ALTER TABLE IF EXISTS ONLY public.sender_rules DROP CONSTRAINT IF EXISTS sender_rules_pkey;
 ALTER TABLE IF EXISTS ONLY public.reservations DROP CONSTRAINT IF EXISTS reservations_pkey;
+ALTER TABLE IF EXISTS ONLY public.recommendation_preferences DROP CONSTRAINT IF EXISTS recommendation_preferences_pkey;
+ALTER TABLE IF EXISTS ONLY public.recommendation_feedback DROP CONSTRAINT IF EXISTS recommendation_feedback_pkey;
 ALTER TABLE IF EXISTS ONLY public.pending_syncs DROP CONSTRAINT IF EXISTS pending_syncs_pkey;
 ALTER TABLE IF EXISTS ONLY public.email_confirmations DROP CONSTRAINT IF EXISTS email_confirmations_pkey;
 ALTER TABLE IF EXISTS ONLY public.catalog_packages DROP CONSTRAINT IF EXISTS catalog_packages_pkey;
@@ -49,6 +54,8 @@ DROP TABLE IF EXISTS public.travel_agencies;
 DROP TABLE IF EXISTS public.support_tickets;
 DROP TABLE IF EXISTS public.sender_rules;
 DROP TABLE IF EXISTS public.reservations;
+DROP TABLE IF EXISTS public.recommendation_preferences;
+DROP TABLE IF EXISTS public.recommendation_feedback;
 DROP TABLE IF EXISTS public.pending_syncs;
 DROP TABLE IF EXISTS public.email_confirmations;
 DROP TABLE IF EXISTS public.catalog_packages;
@@ -193,6 +200,42 @@ CREATE TABLE public.pending_syncs (
     status text NOT NULL,
     next_retry_at timestamp with time zone NOT NULL,
     created_at timestamp with time zone NOT NULL
+);
+
+
+--
+-- Name: recommendation_feedback; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.recommendation_feedback (
+    id text NOT NULL,
+    user_id text NOT NULL,
+    recommendation_id text NOT NULL,
+    title text DEFAULT ''::text NOT NULL,
+    action text NOT NULL,
+    destination_city text DEFAULT ''::text NOT NULL,
+    transport_type text DEFAULT ''::text NOT NULL,
+    created_at timestamp with time zone NOT NULL
+);
+
+
+--
+-- Name: recommendation_preferences; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.recommendation_preferences (
+    user_id text NOT NULL,
+    strategy_id text DEFAULT 'collaborative'::text NOT NULL,
+    budget_level text DEFAULT 'ALL'::text NOT NULL,
+    preferred_transport text DEFAULT 'ALL'::text NOT NULL,
+    focus_style text DEFAULT 'BALANCED'::text NOT NULL,
+    destination_focus text DEFAULT 'ALL'::text NOT NULL,
+    accepted_ids jsonb DEFAULT '[]'::jsonb NOT NULL,
+    dismissed_ids jsonb DEFAULT '[]'::jsonb NOT NULL,
+    category_weights jsonb DEFAULT '{}'::jsonb NOT NULL,
+    destination_weights jsonb DEFAULT '{}'::jsonb NOT NULL,
+    feedback_count integer DEFAULT 0 NOT NULL,
+    updated_at timestamp with time zone NOT NULL
 );
 
 
@@ -353,6 +396,12 @@ fact-c91bdd0b7c691081	anon_58e7a3bb6f73f407	RESERVATION_ADDED	Tokio	JP	["FLIGHT"
 fact-a3ec113d0f3d4022	anon_58e7a3bb6f73f407	RESERVATION_ADDED	Tokio	JP	["FLIGHT", "HOTEL", "TRAIN"]	f	JR Central Shinkansen	2026-11-21 19:25:36.456915+00
 fact-ceb8411b9dd6442c	anon_58e7a3bb6f73f407	RESERVATION_ADDED	Bariloche	AR	["FLIGHT", "HOTEL"]	f	Booking.com	2026-11-21 19:25:36.461595+00
 fact-845a9990e6d674c5	anon_12975dbc0b4c8c48	RESERVATION_ADDED	Bariloche	AR	["HOTEL"]	f	Booking.com	2026-11-21 19:28:22.779851+00
+fact-95015ad010585b70	anon_b42d783e859efab4	TRIP_CREATED	Tokio	JP	["FLIGHT", "HOTEL", "TRAIN"]	f	Tokio	2026-11-22 14:23:12.911032+00
+fact-09f1e1133d4e2141	anon_b42d783e859efab4	TRIP_CREATED	Bariloche	AR	["FLIGHT", "RENTAL", "HOTEL"]	f	Bariloche	2026-11-22 14:23:14.007612+00
+fact-47215cc1dc6e0324	anon_b42d783e859efab4	RESERVATION_ADDED	Tokio	JP	["FLIGHT", "HOTEL", "TRAIN"]	f	All Nippon Airways	2026-11-22 14:23:57.798708+00
+fact-d68113ab123de943	anon_b42d783e859efab4	RESERVATION_ADDED	Bariloche	AR	["FLIGHT", "RENTAL", "HOTEL"]	f	Hertz Rent a Car	2026-11-22 14:24:18.195039+00
+fact-6f5570ef6179624b	anon_b42d783e859efab4	RESERVATION_ADDED	Bariloche	AR	["FLIGHT", "RENTAL", "HOTEL"]	f	Booking.com	2026-11-22 14:24:23.282209+00
+fact-ed20ed6f32dbb73c	anon_b42d783e859efab4	RESERVATION_ADDED	Bariloche	AR	["FLIGHT", "RENTAL", "HOTEL"]	f	All Nippon Airways	2026-11-22 14:25:15.18608+00
 \.
 
 
@@ -427,6 +476,16 @@ eml-4261534476565586	usr-c7ae6c1824782002	noreply@booking.com	Booking.com	Compro
 eml-644a530218cd58bb	usr-c7ae6c1824782002	reservas@jrpass.com	JR Central Shinkansen	Comprobante de Tren — JR Central Shinkansen (PNR: JR-62903)	Confirmación emitida para Japón Imperial: Tokio, Hakone & Kioto. Código PNR: JR-62903. Origen: Tokio Station — Destino: Kioto Station.	JR-62903	TRAIN	Tokio Station	Kioto Station	Tokio	JP	2026-11-29 08:00:00+00	2026-11-29 10:00:00+00	404.6	USD	{"seat": "12E", "wagon": "Coche 7", "trainLine": "Tokaido Shinkansen", "trainNumber": "Nozomi 21", "arrivalStation": "Kioto Central (Andén 12)", "departureStation": "Tokio Central (Andén 16)"}	IMPORTED	Sincronizada en "Viaje a Tokio"	trip-857a1e7f07e1b2ae	2026-11-21 19:23:49.52879+00
 eml-7702c5c03fe92015	usr-c7ae6c1824782002	reservations@booking.com	Booking.com	Confirmación de Alojamiento: Llao Llao Resort, Golf & Spa Bariloche (4 Noches) (PNR: BKG-5508)	Hemos emitido tu comprobante con Booking.com. Localizador PNR: BKG-5508. Servicio: Bustillo Km 25, Bariloche → Llao Llao Resort, Golf & Spa.	BKG-5508	HOTEL	Bustillo Km 25, Bariloche	Llao Llao Resort, Golf & Spa	Bariloche	AR	2026-11-23 14:00:00+00	2026-11-27 10:00:00+00	1180	USD	{"address": "Av. Ezequiel Bustillo Km 25, R8401 San Carlos de Bariloche", "latitude": -41.0583, "roomType": "Suite Lago Moreno", "hotelName": "Llao Llao Resort, Golf & Spa", "longitude": -71.5332, "checkInTime": "15:00", "checkOutTime": "11:00"}	IMPORTED	Sincronizada en "Viaje a Bariloche"	trip-9aeda99c6c53875b	2026-11-21 19:23:24.372354+00
 eml-25fb5574bf05658f	usr-96b7e95209c554b6	reservations@booking.com	Booking.com	Confirmación de Alojamiento: Llao Llao Resort, Golf & Spa Bariloche (4 Noches) (PNR: BKG-5508)	Hemos emitido tu comprobante con Booking.com. Localizador PNR: BKG-5508. Servicio: Bustillo Km 25, Bariloche → Llao Llao Resort, Golf & Spa.	BKG-5508	HOTEL	Bustillo Km 25, Bariloche	Llao Llao Resort, Golf & Spa	Bariloche	AR	2026-11-23 14:00:00+00	2026-11-27 10:00:00+00	1180	USD	{"address": "Av. Ezequiel Bustillo Km 25, R8401 San Carlos de Bariloche", "latitude": -41.0583, "roomType": "Suite Lago Moreno", "hotelName": "Llao Llao Resort, Golf & Spa", "longitude": -71.5332, "checkInTime": "15:00", "checkOutTime": "11:00"}	IMPORTED	Sincronizada en "Viaje America"	trip-247691b21ac4d5fa	2026-11-21 19:28:11.89706+00
+eml-8a65209b608bb4b4	usr-74c7e30427e99334	confirmaciones@ana.co.jp	All Nippon Airways	Confirmación de reserva Vuelo — All Nippon Airways (ANA-59201)	Tu reserva del paquete "Japón Imperial: Tokio, Hakone & Kioto" está confirmada. Código PNR: ANA-59201. Trayecto/Servicio: Los Ángeles (LAX) → Tokio Haneda (HND).	ANA-59201	FLIGHT	Los Ángeles (LAX)	Tokio Haneda (HND)	Tokio	JP	2026-11-25 09:00:00+00	2026-11-25 21:00:00+00	1387.2	USD	{"gate": "114", "seat": "14A", "terminal": "Terminal 3", "cabinClass": "Premium Economy", "flightNumber": "NH 105", "arrivalAirport": "HND", "departureAirport": "LAX"}	IMPORTED	Incorporada al reservar el paquete "Japón Imperial: Tokio, Hakone & Kioto"	trip-3f886f9a4bc209da	2026-11-22 14:23:12.903985+00
+eml-d69ff40f6de2377d	usr-74c7e30427e99334	noreply@booking.com	Booking.com	Confirmación de reserva Alojamiento — Booking.com (BKG-59202)	Tu reserva del paquete "Japón Imperial: Tokio, Hakone & Kioto" está confirmada. Código PNR: BKG-59202. Trayecto/Servicio: Kabukicho, Shinjuku, Tokio → Hotel Gracery Shinjuku.	BKG-59202	HOTEL	Kabukicho, Shinjuku, Tokio	Hotel Gracery Shinjuku	Tokio	JP	2026-11-25 14:00:00+00	2026-12-04 14:00:00+00	1098.2	USD	{"address": "1-19-1 Kabukicho, Shinjuku-ku, Tokio 160-8466", "latitude": 35.6954, "roomType": "Superior Double Panorama", "hotelName": "Hotel Gracery Shinjuku", "longitude": 139.7021, "checkInTime": "15:00", "checkOutTime": "11:00"}	IMPORTED	Incorporada al reservar el paquete "Japón Imperial: Tokio, Hakone & Kioto"	trip-3f886f9a4bc209da	2026-11-22 14:23:12.903985+00
+eml-38f580910abdab7a	usr-74c7e30427e99334	reservas@jrpass.com	JR Central Shinkansen	Confirmación de reserva Tren — JR Central Shinkansen (JR-59203)	Tu reserva del paquete "Japón Imperial: Tokio, Hakone & Kioto" está confirmada. Código PNR: JR-59203. Trayecto/Servicio: Tokio Station → Kioto Station.	JR-59203	TRAIN	Tokio Station	Kioto Station	Tokio	JP	2026-11-29 08:00:00+00	2026-11-29 10:00:00+00	404.6	USD	{"seat": "12E", "wagon": "Coche 7", "trainLine": "Tokaido Shinkansen", "trainNumber": "Nozomi 21", "arrivalStation": "Kioto Central (Andén 12)", "departureStation": "Tokio Central (Andén 16)"}	IMPORTED	Incorporada al reservar el paquete "Japón Imperial: Tokio, Hakone & Kioto"	trip-3f886f9a4bc209da	2026-11-22 14:23:12.903985+00
+eml-df0e3d3183a0968b	usr-74c7e30427e99334	confirmaciones@aerolineas.com.ar	Aerolíneas Argentinas	Confirmación de reserva Vuelo — Aerolíneas Argentinas (AR-59401)	Tu reserva del paquete "Patagonia Andina: Bariloche & Ruta de los 7 Lagos" está confirmada. Código PNR: AR-59401. Trayecto/Servicio: Buenos Aires Aeroparque (AEP) → San Carlos de Bariloche (BRC).	AR-59401	FLIGHT	Buenos Aires Aeroparque (AEP)	San Carlos de Bariloche (BRC)	Bariloche	AR	2026-11-23 07:00:00+00	2026-11-23 09:00:00+00	355.2	USD	{"gate": "07", "seat": "04F", "terminal": "Partidas Nacionales", "cabinClass": "Club Economy", "flightNumber": "AR 1680", "arrivalAirport": "BRC", "departureAirport": "AEP"}	IMPORTED	Incorporada al reservar el paquete "Patagonia Andina: Bariloche & Ruta de los 7 Lagos"	trip-77c3a0e59ef05b83	2026-11-22 14:23:14.003113+00
+eml-abe211cebc154827	usr-74c7e30427e99334	noreply@booking.com	Booking.com	Confirmación de reserva Alojamiento — Booking.com (BKG-59402)	Tu reserva del paquete "Patagonia Andina: Bariloche & Ruta de los 7 Lagos" está confirmada. Código PNR: BKG-59402. Trayecto/Servicio: Av. Ezequiel Bustillo Km 25, Bariloche → Llao Llao Resort, Golf & Spa.	BKG-59402	HOTEL	Av. Ezequiel Bustillo Km 25, Bariloche	Llao Llao Resort, Golf & Spa	Bariloche	AR	2026-11-23 14:00:00+00	2026-11-28 14:00:00+00	799.2	USD	{"address": "Av. Ezequiel Bustillo Km 25, R8401 San Carlos de Bariloche", "latitude": -41.0583, "roomType": "Suite Lago Nahuel Huapi", "hotelName": "Llao Llao Resort, Golf & Spa", "longitude": -71.5332, "checkInTime": "15:00", "checkOutTime": "11:00"}	IMPORTED	Incorporada al reservar el paquete "Patagonia Andina: Bariloche & Ruta de los 7 Lagos"	trip-77c3a0e59ef05b83	2026-11-22 14:23:14.003113+00
+eml-5e05e674ae51a98e	usr-74c7e30427e99334	reservas@hertz.com	Hertz Rent a Car	Confirmación de reserva Alquiler de auto — Hertz Rent a Car (HTZ-59403)	Tu reserva del paquete "Patagonia Andina: Bariloche & Ruta de los 7 Lagos" está confirmada. Código PNR: HTZ-59403. Trayecto/Servicio: Aeropuerto Bariloche (BRC) → Aeropuerto Bariloche (BRC).	HTZ-59403	RENTAL	Aeropuerto Bariloche (BRC)	Aeropuerto Bariloche (BRC)	Bariloche	AR	2026-11-23 10:00:00+00	2026-11-28 10:00:00+00	325.6	USD	{"pickupLocation": "Mostrador Hertz Aeropuerto Bariloche (BRC)", "dropoffLocation": "Mostrador Hertz Aeropuerto Bariloche (BRC)", "vehicleCategory": "SUV 4x4 Automática AWD", "insuranceIncluded": true}	IMPORTED	Incorporada al reservar el paquete "Patagonia Andina: Bariloche & Ruta de los 7 Lagos"	trip-77c3a0e59ef05b83	2026-11-22 14:23:14.003113+00
+eml-08341e6584875ee0	usr-74c7e30427e99334	confirmations@ana.co.jp	All Nippon Airways	Confirmación Vuelo — Vuelo Directo a Tokio Haneda (NH 105) (ANA-8821)	Reserva confirmada en el catálogo Trotamundos. Código PNR: ANA-8821. Los Ángeles (LAX) → Tokio Haneda (HND).	ANA-8821	FLIGHT	Los Ángeles (LAX)	Tokio Haneda (HND)	Tokio	JP	2026-11-25 09:00:00+00	2026-11-25 21:00:00+00	1280	USD	{"gate": "114", "seat": "14A", "terminal": "Terminal 3", "cabinClass": "Premium Economy", "flightNumber": "NH 105", "arrivalAirport": "HND", "departureAirport": "LAX"}	IMPORTED	Agregada al viaje "Japón Imperial: Tokio, Hakone & Kioto"	trip-3f886f9a4bc209da	2026-11-22 14:23:57.801866+00
+eml-840bafbae63925a4	usr-74c7e30427e99334	confirmations@hertz.com	Hertz Rent a Car	Confirmación Alquiler de auto — Alquiler SUV 4x4 Automática en Bariloche (5 Días) (HTZ-3319)	Reserva confirmada en el catálogo Trotamundos. Código PNR: HTZ-3319. Aeropuerto Bariloche (BRC) → Aeropuerto Bariloche (BRC).	HTZ-3319	RENTAL	Aeropuerto Bariloche (BRC)	Aeropuerto Bariloche (BRC)	Bariloche	AR	2026-11-23 10:00:00+00	2026-11-28 10:00:00+00	340	USD	{"pickupLocation": "Mostrador Hertz Aeropuerto Bariloche (BRC)", "dropoffLocation": "Mostrador Hertz Aeropuerto Bariloche (BRC)", "vehicleCategory": "SUV 4x4 Automática AWD", "insuranceIncluded": true}	IMPORTED	Agregada al viaje "Patagonia Andina: Bariloche & Ruta de los 7 Lagos"	trip-77c3a0e59ef05b83	2026-11-22 14:24:18.196963+00
+eml-ae165508af7b2458	usr-74c7e30427e99334	reservations@booking.com	Booking.com	Confirmación Alojamiento — Llao Llao Resort, Golf & Spa Bariloche (4 Noches) (BKG-5508)	Reserva confirmada en el catálogo Trotamundos. Código PNR: BKG-5508. Bustillo Km 25, Bariloche → Llao Llao Resort, Golf & Spa.	BKG-5508	HOTEL	Bustillo Km 25, Bariloche	Llao Llao Resort, Golf & Spa	Bariloche	AR	2026-11-23 14:00:00+00	2026-11-27 10:00:00+00	1180	USD	{"address": "Av. Ezequiel Bustillo Km 25, R8401 San Carlos de Bariloche", "latitude": -41.0583, "roomType": "Suite Lago Moreno", "hotelName": "Llao Llao Resort, Golf & Spa", "longitude": -71.5332, "checkInTime": "15:00", "checkOutTime": "11:00"}	IMPORTED	Agregada al viaje "Patagonia Andina: Bariloche & Ruta de los 7 Lagos"	trip-77c3a0e59ef05b83	2026-11-22 14:24:23.282835+00
+eml-9b185d27821fbfd2	usr-74c7e30427e99334	confirmations@ana.co.jp	All Nippon Airways	Confirmación Vuelo — Vuelo Directo a Tokio Haneda (NH 105) (ANA-8821)	Reserva confirmada en el catálogo Trotamundos. Código PNR: ANA-8821. Los Ángeles (LAX) → Tokio Haneda (HND).	ANA-8821	FLIGHT	Los Ángeles (LAX)	Tokio Haneda (HND)	Tokio	JP	2026-11-25 09:00:00+00	2026-11-25 21:00:00+00	1280	USD	{"gate": "114", "seat": "14A", "terminal": "Terminal 3", "cabinClass": "Premium Economy", "flightNumber": "NH 105", "arrivalAirport": "HND", "departureAirport": "LAX"}	IMPORTED	Agregada al viaje "Patagonia Andina: Bariloche & Ruta de los 7 Lagos"	trip-77c3a0e59ef05b83	2026-11-22 14:25:15.188321+00
 \.
 
 
@@ -435,6 +494,29 @@ eml-25fb5574bf05658f	usr-96b7e95209c554b6	reservations@booking.com	Booking.com	C
 --
 
 COPY public.pending_syncs (id, user_id, source, provider_name, summary, raw_payload, error_reason, attempts, status, next_retry_at, created_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: recommendation_feedback; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.recommendation_feedback (id, user_id, recommendation_id, title, action, destination_city, transport_type, created_at) FROM stdin;
+rfb-84bc5eb502f0675f	usr-74c7e30427e99334	rec-off-off-bus-vbr-1920	Bus Panorámico Cama Suite (Bariloche → San Martín de los Andes)	ACCEPT	Bariloche	BUS	2026-11-22 18:02:04.106295+00
+rfb-8cd64bc089a97778	usr-74c7e30427e99334	rec-off-off-bus-als-2088	Autobús ALSA Supra VIP (Madrid → Granada)	DISMISS	Madrid	BUS	2026-11-22 18:02:16.348054+00
+rfb-63a7730a7ad56e5b	usr-74c7e30427e99334	rec-off-off-train-jr-9914	Tren Bala Shinkansen Nozomi 21 (Tokio → Kioto)	ACCEPT	Tokio	TRAIN	2026-11-22 18:02:23.208482+00
+rfb-4c1a4f3f88f51ca5	usr-74c7e30427e99334	rec-cur-florencia	Conexión Alta Velocidad Frecciarossa Roma → Florencia	DISMISS	Roma	TRAIN	2026-11-22 18:02:31.92347+00
+rfb-3e26a79bce9b8ec9	usr-74c7e30427e99334	rec-off-off-hotel-bkg-7741	Hotel Gracery Shinjuku Tokio (5 Noches)	DISMISS	Tokio	HOTEL	2026-11-22 18:02:42.342395+00
+rfb-610c129df69ece46	usr-74c7e30427e99334	rec-cur-hakone	Pase Regional Hakone + Tren Romancecar al Monte Fuji	ACCEPT	Tokio	TRAIN	2026-11-22 18:02:55.066802+00
+\.
+
+
+--
+-- Data for Name: recommendation_preferences; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.recommendation_preferences (user_id, strategy_id, budget_level, preferred_transport, focus_style, destination_focus, accepted_ids, dismissed_ids, category_weights, destination_weights, feedback_count, updated_at) FROM stdin;
+usr-74c7e30427e99334	trending	ALL	ALL	BALANCED	ALL	["rec-off-off-bus-vbr-1920", "rec-off-off-train-jr-9914", "rec-cur-hakone"]	["rec-off-off-bus-als-2088", "rec-cur-florencia", "rec-off-off-hotel-bkg-7741"]	{"BUS": 1, "HOTEL": -1, "TRAIN": 3}	{"Roma": -1, "Tokio": 3, "Madrid": -1, "Bariloche": 2}	6	2026-11-22 18:04:24.948833+00
 \.
 
 
@@ -457,6 +539,16 @@ res-1f535ab2b306331d	trip-857a1e7f07e1b2ae	HOTEL	CONFIRMED	Booking.com	BKG-62902
 res-43b1ee69edaeffc8	trip-857a1e7f07e1b2ae	TRAIN	CONFIRMED	JR Central Shinkansen	JR-62903	Tokio Station	Kioto Station	2026-11-29 08:00:00+00	2026-11-29 10:00:00+00	404.6	USD	Sincronizada desde tu bandeja (@jrpass.com)	EMAIL_SCAN	f	null	{"seat": "12E", "wagon": "Coche 7", "trainLine": "Tokaido Shinkansen", "trainNumber": "Nozomi 21", "arrivalStation": "Kioto Central (Andén 12)", "departureStation": "Tokio Central (Andén 16)"}	2026-11-21 19:25:36.455548+00	2026-11-21 19:25:36.455548+00
 res-c914c60f267ad9c4	trip-9aeda99c6c53875b	HOTEL	CONFIRMED	Booking.com	BKG-5508	Bustillo Km 25, Bariloche	Llao Llao Resort, Golf & Spa	2026-11-23 14:00:00+00	2026-11-27 10:00:00+00	1180	USD	Sincronizada desde tu bandeja (@booking.com)	EMAIL_SCAN	f	null	{"address": "Av. Ezequiel Bustillo Km 25, R8401 San Carlos de Bariloche", "latitude": -41.0583, "roomType": "Suite Lago Moreno", "hotelName": "Llao Llao Resort, Golf & Spa", "longitude": -71.5332, "checkInTime": "15:00", "checkOutTime": "11:00"}	2026-11-21 19:25:36.460398+00	2026-11-21 19:25:36.460398+00
 res-98a1cf1839bf76e9	trip-247691b21ac4d5fa	HOTEL	CONFIRMED	Booking.com	BKG-5508	Bustillo Km 25, Bariloche	Llao Llao Resort, Golf & Spa	2026-11-23 14:00:00+00	2026-11-27 10:00:00+00	1180	USD	Sincronizada desde tu bandeja (@booking.com)	EMAIL_SCAN	f	null	{"address": "Av. Ezequiel Bustillo Km 25, R8401 San Carlos de Bariloche", "latitude": -41.0583, "roomType": "Suite Lago Moreno", "hotelName": "Llao Llao Resort, Golf & Spa", "longitude": -71.5332, "checkInTime": "15:00", "checkOutTime": "11:00"}	2026-11-21 19:28:22.778187+00	2026-11-21 19:28:22.778187+00
+res-ccc7624559864846	trip-3f886f9a4bc209da	FLIGHT	CONFIRMED	All Nippon Airways	ANA-59201	Los Ángeles (LAX)	Tokio Haneda (HND)	2026-11-25 09:00:00+00	2026-11-25 21:00:00+00	1387.2	USD	Vuelo transpacífico directo • Equipaje facturado y selección de asiento incluidos	CATALOG	f	null	{"gate": "114", "seat": "14A", "terminal": "Terminal 3", "cabinClass": "Premium Economy", "flightNumber": "NH 105", "arrivalAirport": "HND", "departureAirport": "LAX"}	2026-11-22 14:23:12.903985+00	2026-11-22 14:23:12.903985+00
+res-35cb02d8cae50303	trip-3f886f9a4bc209da	FLIGHT	CONFIRMED	All Nippon Airways	ANA-8821	Los Ángeles (LAX)	Tokio Haneda (HND)	2026-11-25 09:00:00+00	2026-11-25 21:00:00+00	1280	USD	Vuelo Directo a Tokio Haneda (NH 105)	CATALOG	f	null	{"gate": "114", "seat": "14A", "terminal": "Terminal 3", "cabinClass": "Premium Economy", "flightNumber": "NH 105", "arrivalAirport": "HND", "departureAirport": "LAX"}	2026-11-22 14:23:57.795187+00	2026-11-22 14:23:57.795187+00
+res-bb93277b2f5d2cab	trip-3f886f9a4bc209da	HOTEL	CONFIRMED	Booking.com	BKG-59202	Kabukicho, Shinjuku, Tokio	Hotel Gracery Shinjuku	2026-11-25 14:00:00+00	2026-12-04 14:00:00+00	1098.2	USD	Habitación Superior panorámica a pasos de la estación Shinjuku • Desayuno incluido	CATALOG	f	null	{"address": "1-19-1 Kabukicho, Shinjuku-ku, Tokio 160-8466", "latitude": 35.6954, "roomType": "Superior Double Panorama", "hotelName": "Hotel Gracery Shinjuku", "longitude": 139.7021, "checkInTime": "15:00", "checkOutTime": "11:00"}	2026-11-22 14:23:12.903985+00	2026-11-22 14:23:12.903985+00
+res-f29c634f1c7ee4bb	trip-3f886f9a4bc209da	TRAIN	CONFIRMED	JR Central Shinkansen	JR-59203	Tokio Station	Kioto Station	2026-11-29 08:00:00+00	2026-11-29 10:00:00+00	404.6	USD	Asiento reservado ventanilla E con vista al Monte Fuji en Hakone	CATALOG	f	null	{"seat": "12E", "wagon": "Coche 7", "trainLine": "Tokaido Shinkansen", "trainNumber": "Nozomi 21", "arrivalStation": "Kioto Central (Andén 12)", "departureStation": "Tokio Central (Andén 16)"}	2026-11-22 14:23:12.903985+00	2026-11-22 14:23:12.903985+00
+res-b6319f51bb6f9f69	trip-77c3a0e59ef05b83	RENTAL	CONFIRMED	Hertz Rent a Car	HTZ-3319	Aeropuerto Bariloche (BRC)	Aeropuerto Bariloche (BRC)	2026-11-23 10:00:00+00	2026-11-28 10:00:00+00	340	USD	Alquiler SUV 4x4 Automática en Bariloche (5 Días)	CATALOG	f	null	{"pickupLocation": "Mostrador Hertz Aeropuerto Bariloche (BRC)", "dropoffLocation": "Mostrador Hertz Aeropuerto Bariloche (BRC)", "vehicleCategory": "SUV 4x4 Automática AWD", "insuranceIncluded": true}	2026-11-22 14:24:18.193162+00	2026-11-22 14:24:18.193162+00
+res-4f635121751f928f	trip-77c3a0e59ef05b83	HOTEL	CONFIRMED	Booking.com	BKG-59402	Av. Ezequiel Bustillo Km 25, Bariloche	Llao Llao Resort, Golf & Spa	2026-11-23 14:00:00+00	2026-11-28 14:00:00+00	799.2	USD	Suite Lago Moreno con acceso ilimitado a piscina climatizada in-out y spa	CATALOG	f	null	{"address": "Av. Ezequiel Bustillo Km 25, R8401 San Carlos de Bariloche", "latitude": -41.0583, "roomType": "Suite Lago Nahuel Huapi", "hotelName": "Llao Llao Resort, Golf & Spa", "longitude": -71.5332, "checkInTime": "15:00", "checkOutTime": "11:00"}	2026-11-22 14:23:14.003113+00	2026-11-22 14:23:14.003113+00
+res-354f4a2ab1fb2d7f	trip-77c3a0e59ef05b83	HOTEL	CONFIRMED	Booking.com	BKG-5508	Bustillo Km 25, Bariloche	Llao Llao Resort, Golf & Spa	2026-11-23 14:00:00+00	2026-11-27 10:00:00+00	1180	USD	Llao Llao Resort, Golf & Spa Bariloche (4 Noches)	CATALOG	f	null	{"address": "Av. Ezequiel Bustillo Km 25, R8401 San Carlos de Bariloche", "latitude": -41.0583, "roomType": "Suite Lago Moreno", "hotelName": "Llao Llao Resort, Golf & Spa", "longitude": -71.5332, "checkInTime": "15:00", "checkOutTime": "11:00"}	2026-11-22 14:24:23.278138+00	2026-11-22 14:24:23.278138+00
+res-84a7ec3610acc173	trip-77c3a0e59ef05b83	FLIGHT	CONFIRMED	Aerolíneas Argentinas	AR-59401	Buenos Aires Aeroparque (AEP)	San Carlos de Bariloche (BRC)	2026-11-23 07:00:00+00	2026-11-23 09:00:00+00	355.2	USD	Cabina Club Economy • Equipaje de bodega incluido	CATALOG	f	null	{"gate": "07", "seat": "04F", "terminal": "Partidas Nacionales", "cabinClass": "Club Economy", "flightNumber": "AR 1680", "arrivalAirport": "BRC", "departureAirport": "AEP"}	2026-11-22 14:23:14.003113+00	2026-11-22 14:23:14.003113+00
+res-d7149403401e219c	trip-77c3a0e59ef05b83	RENTAL	CONFIRMED	Hertz Rent a Car	HTZ-59403	Aeropuerto Bariloche (BRC)	Aeropuerto Bariloche (BRC)	2026-11-23 10:00:00+00	2026-11-28 10:00:00+00	325.6	USD	SUV 4x4 Automática con kilometraje libre para la Ruta de los 7 Lagos	CATALOG	f	null	{"pickupLocation": "Mostrador Hertz Aeropuerto Bariloche (BRC)", "dropoffLocation": "Mostrador Hertz Aeropuerto Bariloche (BRC)", "vehicleCategory": "SUV 4x4 Automática AWD", "insuranceIncluded": true}	2026-11-22 14:23:14.003113+00	2026-11-22 14:23:14.003113+00
+res-7874eeda1f0621b6	trip-77c3a0e59ef05b83	FLIGHT	CONFIRMED	All Nippon Airways	ANA-8821	Los Ángeles (LAX)	Tokio Haneda (HND)	2026-11-25 09:00:00+00	2026-11-25 21:00:00+00	1280	USD	Vuelo Directo a Tokio Haneda (NH 105)	CATALOG	f	null	{"gate": "114", "seat": "14A", "terminal": "Terminal 3", "cabinClass": "Premium Economy", "flightNumber": "NH 105", "arrivalAirport": "HND", "departureAirport": "LAX"}	2026-11-22 14:25:15.18353+00	2026-11-22 14:25:15.18353+00
 \.
 
 
@@ -577,6 +669,22 @@ sr-d72b1573baea018c	usr-c7ae6c1824782002	@avis.com	Avis Prestige	Vehículos	t	t	
 sr-17d1a358bf00805e	usr-c7ae6c1824782002	@alsa.es	ALSA Autobuses	Autobuses	t	t	2026-11-21 19:22:37.709904+00
 sr-8eac360af250a90e	usr-c7ae6c1824782002	@viabariloche.com.ar	Vía Bariloche	Autobuses	t	t	2026-11-21 19:22:38.709904+00
 sr-477cddd3d43c75b3	usr-c7ae6c1824782002	@booking.com	Booking.com	Alojamientos	t	t	2026-11-21 19:22:24.709904+00
+sr-0fb50c1128c13b96	usr-74c7e30427e99334	@trotamundos.app	Catálogo Oficial Trotamundos	Plataforma	t	t	2026-11-22 14:23:02.476983+00
+sr-d8545bbc0838a8a1	usr-74c7e30427e99334	@booking.com	Booking.com	Alojamientos	t	t	2026-11-22 14:23:03.476983+00
+sr-be49062864cd8d05	usr-74c7e30427e99334	@ana.co.jp	All Nippon Airways	Aerolíneas	t	t	2026-11-22 14:23:04.476983+00
+sr-077e68bcfdee7882	usr-74c7e30427e99334	@iberia.com	Iberia Líneas Aéreas	Aerolíneas	t	t	2026-11-22 14:23:05.476983+00
+sr-2567a87e0eba7664	usr-74c7e30427e99334	@aerolineas.com.ar	Aerolíneas Argentinas	Aerolíneas	t	t	2026-11-22 14:23:06.476983+00
+sr-17efadbebaa6744f	usr-74c7e30427e99334	@latam.com	LATAM Airlines	Aerolíneas	t	t	2026-11-22 14:23:07.476983+00
+sr-d29c3f20f79f8c44	usr-74c7e30427e99334	@ita-airways.com	ITA Airways	Aerolíneas	t	t	2026-11-22 14:23:08.476983+00
+sr-fd49e3c65495d952	usr-74c7e30427e99334	@airfrance.fr	Air France	Aerolíneas	t	t	2026-11-22 14:23:09.476983+00
+sr-6049b6008cfc9402	usr-74c7e30427e99334	@jrpass.com	JR Central Shinkansen	Trenes	t	t	2026-11-22 14:23:10.476983+00
+sr-4d0df6160510082f	usr-74c7e30427e99334	@renfe.com	Renfe AVE	Trenes	t	t	2026-11-22 14:23:11.476983+00
+sr-b42e5c575d9f9bd6	usr-74c7e30427e99334	@eurostar.com	Eurostar International	Trenes	t	t	2026-11-22 14:23:12.476983+00
+sr-296327ca7663bc23	usr-74c7e30427e99334	@perurail.com	PeruRail Vistadome	Trenes	t	t	2026-11-22 14:23:13.476983+00
+sr-95089517ea967de1	usr-74c7e30427e99334	@hertz.com	Hertz Rent a Car	Vehículos	t	t	2026-11-22 14:23:14.476983+00
+sr-c3b51c105f2eb3dd	usr-74c7e30427e99334	@avis.com	Avis Prestige	Vehículos	t	t	2026-11-22 14:23:15.476983+00
+sr-9bd3e9e281410084	usr-74c7e30427e99334	@alsa.es	ALSA Autobuses	Autobuses	t	t	2026-11-22 14:23:16.476983+00
+sr-96845bb77d01a99e	usr-74c7e30427e99334	@viabariloche.com.ar	Vía Bariloche	Autobuses	t	t	2026-11-22 14:23:17.476983+00
 \.
 
 
@@ -615,6 +723,8 @@ trip-16c90494f7187db4	usr-96b7e95209c554b6	null	[]	Viaje a París	París	FR	http
 trip-857a1e7f07e1b2ae	usr-c7ae6c1824782002	null	[]	Viaje a Tokio	Tokio	JP	https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=1000&q=80	ACTIVE	2026-11-25 09:00:00+00	2026-12-04 14:00:00+00	2026-11-21 19:25:36.443065+00	2026-11-21 19:25:36.45555+00
 trip-9aeda99c6c53875b	usr-c7ae6c1824782002	null	[]	Viaje a Bariloche	Bariloche	AR	https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1000&q=80	ACTIVE	2026-11-23 07:00:00+00	2026-11-27 10:00:00+00	2026-11-21 19:25:35.86193+00	2026-11-21 19:25:36.460399+00
 trip-247691b21ac4d5fa	usr-96b7e95209c554b6	null	[]	Viaje America	Bariloche	AR	https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1000&q=80	ACTIVE	2026-11-23 14:00:00+00	2026-11-27 10:00:00+00	2026-11-21 19:10:46.061199+00	2026-11-21 19:28:22.778188+00
+trip-3f886f9a4bc209da	usr-74c7e30427e99334	null	[]	Japón Imperial: Tokio, Hakone & Kioto	Tokio	JP	https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=1200&q=85	ACTIVE	2026-11-25 09:00:00+00	2026-12-04 14:00:00+00	2026-11-22 14:23:12.903985+00	2026-11-22 14:23:57.795194+00
+trip-77c3a0e59ef05b83	usr-74c7e30427e99334	null	[]	Patagonia Andina: Bariloche & Ruta de los 7 Lagos	Bariloche	AR	https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=85	ACTIVE	2026-11-23 07:00:00+00	2026-11-28 14:00:00+00	2026-11-22 14:23:14.003113+00	2026-11-22 14:25:15.183535+00
 \.
 
 
@@ -630,6 +740,7 @@ usr-ed97b9ed908373ef	Hermes	hermes@hotmail.com	pbkdf2_sha256$15000$JnTbWplPuQ68q
 usr-c20e381f93bcba4e	Camila Verificadora	camila.verify.1795287009140@trotamundos.app	pbkdf2_sha256$15000$ckXqLANseGrrC7n2WTWsQg$o1R1IO3FnJ+pgdnoxXXRba1qq/3RzBOryj/h/z2ltuI	traveler	ARS	ag-iberia	t	camila.verify.1795287009140@trotamundos.app	CV	2026-11-21 18:50:10.04795+00
 usr-96b7e95209c554b6	Daniel Galardi	chang27@gmail.com	pbkdf2_sha256$15000$z1btyf10IuWIjIAYx8kNkg$ggNysvdMCOsxeRxBvJ1AsvRYumEHp0899xPL1OGUpNg	traveler	ARS	ag-andes	t	chang27@gmail.com	DG	2026-11-21 18:23:59.830626+00
 usr-c7ae6c1824782002	Tester Correo	tester.correo.1795288942@trotamundos.app	pbkdf2_sha256$15000$zgaMl52iwjwc2DsocLFhVQ$1FOM+P/nWMumrokEFiojPeZRgJDkpm+FC+A3RGkXUAc	traveler	USD	ag-andes	t	tester.correo.1795288942@trotamundos.app	TC	2026-11-21 19:22:23.667154+00
+usr-74c7e30427e99334	Hermes	hermes@hermes.com	pbkdf2_sha256$15000$oPn7dVtnKESeq5R6PKQKGw$vEqUvxcmsycbfLNvhiUr+bv/kLGLqdPw3KKcqcP3Tzc	traveler	USD	ag-andes	t	hermes@hermes.com	HE	2026-11-22 14:23:02.473774+00
 \.
 
 
@@ -679,6 +790,22 @@ ALTER TABLE ONLY public.email_confirmations
 
 ALTER TABLE ONLY public.pending_syncs
     ADD CONSTRAINT pending_syncs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: recommendation_feedback recommendation_feedback_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recommendation_feedback
+    ADD CONSTRAINT recommendation_feedback_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: recommendation_preferences recommendation_preferences_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recommendation_preferences
+    ADD CONSTRAINT recommendation_preferences_pkey PRIMARY KEY (user_id);
 
 
 --
@@ -767,6 +894,13 @@ CREATE INDEX idx_email_confirmations_user ON public.email_confirmations USING bt
 
 
 --
+-- Name: idx_recommendation_feedback_user; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_recommendation_feedback_user ON public.recommendation_feedback USING btree (user_id);
+
+
+--
 -- Name: idx_reservations_trip; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -793,6 +927,22 @@ CREATE INDEX idx_trips_owner ON public.trips USING btree (owner_id);
 
 ALTER TABLE ONLY public.email_confirmations
     ADD CONSTRAINT email_confirmations_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: recommendation_feedback recommendation_feedback_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recommendation_feedback
+    ADD CONSTRAINT recommendation_feedback_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: recommendation_preferences recommendation_preferences_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.recommendation_preferences
+    ADD CONSTRAINT recommendation_preferences_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
 
 
 --
@@ -831,5 +981,5 @@ ALTER TABLE ONLY public.trips
 -- PostgreSQL database dump complete
 --
 
-\unrestrict ugLdUeSmgfXwZbCGEdl2i6wyo8qmgo7Ya1muWzhkraU6etAktc4bPIaxkZbPWyO
+\unrestrict fJfsudWE00t9fIlqZuBhoBWHTgdY4zxm7DrfxfmMBXBVn4kd8eOpW62oTuUZASj
 
