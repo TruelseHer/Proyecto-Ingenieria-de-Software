@@ -31,4 +31,4 @@ fi
 echo "Cerrando contenedores (conservando volúmenes de datos)..."
 docker compose down
 
-echo "Trotamundos V2 cerrado correctamente. Todos los datos quedaron guardados."
+echo "Trotamundos cerrado correctamente. Todos los datos quedaron guardados."
