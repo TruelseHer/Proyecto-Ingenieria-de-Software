@@ -1,4 +1,4 @@
-# Trotamundos V2
+# Trotamundos Aplicacion
 
 Plataforma web comercial de reservas multimodales, gestión inteligente de itinerarios, sincronización de confirmaciones por correo/PNR y guía interactiva en destino.
 
