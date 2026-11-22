@@ -108,7 +108,7 @@ done
 docker compose ps
 
 if [ "$APP_READY" = "true" ]; then
-  echo "Trotamundos V2 iniciado y operativo en: http://localhost:8080"
+  echo "Trotamundos iniciado y operativo en: http://localhost:8080"
 else
   echo "Los contenedores están iniciados; verifica el estado en unos segundos en: http://localhost:8080"
 fi
