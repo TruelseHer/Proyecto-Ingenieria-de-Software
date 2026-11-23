@@ -39,7 +39,7 @@ Al ejecutar `./cerrar.sh`, se genera un respaldo SQL portátil en `backups/trota
 ## Ejecución con Docker Compose
 
 ```bash
-cd TrotamundosAplicacionV2
+cd Trotamundos Aplicacion
 docker compose up --build -d
 ```
 
@@ -48,7 +48,7 @@ Luego abre **[http://localhost:8080](http://localhost:8080)** en tu navegador, c
 ## Ejecución Local y Pruebas Automatizadas
 
 ```bash
-cd TrotamundosAplicacionV2
+cd Trotamundos Aplicacion
 go test -v ./...
 go run ./cmd/server
 ```
