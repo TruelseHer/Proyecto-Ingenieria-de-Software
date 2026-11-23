@@ -27,7 +27,7 @@ Plataforma web comercial de reservas multimodales, gestión inteligente de itine
 Para iniciar y cerrar la aplicación manteniendo todos los datos creados en PostgreSQL:
 
 ```bash
-cd Trotamundos Aplicacion
+cd "Trotamundos Aplicacion"
 ./iniciar.sh              # Inicia db, cache y app (restaura respaldo si la BD está vacía)
 ./iniciar.sh --build      # Reconstruye la imagen de la aplicación e inicia
 ./iniciar.sh --restaurar  # Fuerza la restauración desde backups/trotamundos_backup.sql
@@ -39,7 +39,7 @@ Al ejecutar `./cerrar.sh`, se genera un respaldo SQL portátil en `backups/trota
 ## Ejecución con Docker Compose
 
 ```bash
-cd Trotamundos Aplicacion
+cd "Trotamundos Aplicacion"
 docker compose up --build -d
 ```
 
@@ -48,7 +48,7 @@ Luego abre **[http://localhost:8080](http://localhost:8080)** en tu navegador, c
 ## Ejecución Local y Pruebas Automatizadas
 
 ```bash
-cd Trotamundos Aplicacion
+cd "Trotamundos Aplicacion"
 go test -v ./...
 go run ./cmd/server
 ```
